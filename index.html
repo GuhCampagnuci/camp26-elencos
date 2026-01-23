@@ -134,41 +134,78 @@
     .groups{margin-top:12px;display:none}
     .team.open .groups{display:block}
 
+    /* =========================
+       ✅ GRUPOS (POSIÇÕES) – MAIS VISÍVEL
+       ========================= */
+
     .group{
-      margin-top:10px;
+      margin-top:12px;
       border-top:1px solid var(--line);
-      padding-top:10px;
+      padding-top:12px;
     }
 
+    /* Cabeçalho do grupo MUITO mais forte e com "cara" de seção */
     .groupHead{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:8px;
-      margin-bottom:8px;
+      gap:10px;
+
+      padding:10px 12px;
+      margin:0 0 10px 0;
+
+      border:1px solid rgba(124,58,237,.25);
+      border-radius:12px;
+
+      background:rgba(17,24,39,.55);
+      position:relative;
     }
 
+    /* Barra lateral roxa no cabeçalho do grupo */
+    .groupHead::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:4px;
+      border-radius:12px 0 0 12px;
+      background:var(--accent);
+    }
+
+    /* Título do grupo maior e mais pesado */
     .groupLabel{
       margin:0;
-      font-size:13px;
+      font-size:15px;
+      font-weight:900;
+      letter-spacing:.2px;
       color:#fff;
+      padding-left:6px; /* dá espaço pra barra roxa */
     }
 
+    /* Contador mais "badge" */
     .count{
       font-size:12px;
-      color:var(--muted);
-      border:1px solid var(--line);
-      padding:4px 8px;
+      color:#fff;
+      border:1px solid rgba(124,58,237,.35);
+      padding:4px 10px;
       border-radius:999px;
-      background:rgba(17,24,39,.35);
+      background:rgba(124,58,237,.14);
+      font-weight:800;
     }
 
+    /* Agora os jogadores ficam "dentro" do grupo (indentação visual) */
     .player{
       display:flex;
       justify-content:space-between;
       align-items:center;
       gap:10px;
-      padding:6px 0;
+
+      padding:8px 4px;
+      margin-left:10px;              /* <<< recuo pra mostrar hierarquia */
+      padding-left:10px;
+      border-left:2px solid rgba(42,51,90,.9);  /* <<< linha guia do grupo */
+
       border-bottom:1px dashed rgba(42,51,90,.8);
       font-size:13px;
     }
@@ -189,14 +226,16 @@
       max-width:180px;
     }
 
+    /* Posição (GOL/MC/etc) mais legível */
     .pos{
-      font-size:12px;
-      color:var(--muted);
+      font-size:13px;
+      color:#fff;
       border:1px solid var(--line);
-      padding:2px 6px;
-      border-radius:8px;
+      padding:3px 8px;
+      border-radius:10px;
       background:rgba(17,24,39,.35);
       white-space:nowrap;
+      font-weight:800;
     }
 
     .ovr{
@@ -276,7 +315,7 @@
   // CONFIG
   // =========================
   // 1) Cole sua URL do Pipedream aqui (ou passe via ?api=)
-  const DEFAULT_API_URL = "https://eod2e2u42oodf3z.m.pipedream.net"; // ex: "https://eod2eu42oodf3z.m.pipedream.net/"
+  const DEFAULT_API_URL = "https://eod2e2u42oodf3z.m.pipedream.net";
 
   const params = new URLSearchParams(location.search);
   const API_URL = params.get('api') || DEFAULT_API_URL;
@@ -333,7 +372,7 @@
               </div>
             `;
           }).join('')
-        : `<div style="color:var(--muted);font-size:12px;">Sem jogadores nesse grupo</div>`;
+        : `<div style="color:var(--muted);font-size:12px;margin-left:10px;">Sem jogadores nesse grupo</div>`;
 
       return `
         <div class="group" data-group="${escapeHtml(g.label)}">
@@ -443,5 +482,3 @@
 
 </body>
 </html>
-
-
