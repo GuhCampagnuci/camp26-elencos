@@ -1,166 +1,552 @@
-export default defineComponent({
-  async run({ steps }) {
-
-    // =========================
-    // 0) CONFIG - nome do step do Google Sheets
-    // =========================
-    // Ajuste aqui se seu step do Sheets tiver outro nome.
-    // Exemplo comum: steps.google_sheets.$return_value
-    const SHEETS_STEP_NAME = "get_values_in_range";
-
-    const sheetStep = steps[SHEETS_STEP_NAME];
-    const rows = sheetStep?.$return_value || [];
-
-    if (!Array.isArray(rows) || rows.length === 0) {
-      return {
-        teams: [],
-        totalTeams: 0,
-        totalPlayers: 0,
-        warning: "Nenhuma linha recebida do Google Sheets. Verifique o step do Sheets e o range."
-      };
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAMP 2026 – Times</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a33;
+      --panel2:#111827;
+      --muted:#9aa3b2;
+      --line:#2a335a;
+      --accent:#7c3aed;
+      --ok:#22c55e;
+      --warn:#fbbf24;
+      --bad:#ef4444;
     }
 
-    // Remove cabeçalho
-    const data = rows.slice(1);
-
-    // =========================
-    // 1) Helpers
-    // =========================
-    const toUpperTrim = (v) => String(v ?? "").trim().toUpperCase();
-
-    // Converte "PE/PD/MD/MC" -> ["PE","PD","MD","MC"]
-    const splitPositions = (posRaw) =>
-      String(posRaw || "")
-        .split("/")
-        .map(p => toUpperTrim(p))
-        .filter(Boolean);
-
-    // Regra: grupo baseado na PRIMEIRA posição (posição principal)
-    const positionGroups = {
-      // Goleiro
-      GOL: "Goleiros",
-
-      // Defesa
-      ZAG: "Defensores",
-      LD:  "Defensores",
-      LE:  "Defensores",
-
-      // Meio (inclui MEI e VOL)
-      MC:  "Meio-campistas",
-      MD:  "Meio-campistas",
-      ME:  "Meio-campistas",
-      MEI: "Meio-campistas",
-      VOL: "Meio-campistas",
-
-      // Ataque
-      ATA: "Atacantes",
-      PD:  "Atacantes",
-      PE:  "Atacantes",
-
-      // Se algum dia aparecer:
-      CA:  "Atacantes"
-    };
-
-    const GROUP_ORDER = ["Goleiros", "Defensores", "Meio-campistas", "Atacantes"];
-
-    const parseOverall = (v) => {
-      if (v === null || v === undefined) return null;
-      const s = String(v).trim();
-      if (s === "") return null;
-
-      // aceita "85", 85, "85.0"
-      const n = Number(s.replace(",", "."));
-      return Number.isNaN(n) ? null : n;
-    };
-
-    // =========================
-    // 2) Monta times e jogadores
-    // =========================
-    const teamsMap = {}; // { "Liverpool": { name, players: [] } }
-
-    for (const row of data) {
-      // Esperado: [Time, Jogador, Posições, Overall]
-      const teamRaw = row?.[0];
-      const nameRaw = row?.[1];
-      const posRaw  = row?.[2];
-      const ovrRaw  = row?.[3];
-
-      const team = String(teamRaw || "").trim();
-      const name = String(nameRaw || "").trim();
-
-      if (!team || !name || !posRaw) continue;
-
-      const positions = splitPositions(posRaw);
-      if (!positions.length) continue;
-
-      const primaryPos = positions[0]; // ✅ principal = primeira
-      const overall = parseOverall(ovrRaw);
-
-      if (!teamsMap[team]) {
-        teamsMap[team] = { name: team, players: [] };
-      }
-
-      teamsMap[team].players.push({
-        name,
-        positions,    // mantém todas (exibição opcional)
-        primaryPos,   // ✅ principal
-        overall
-      });
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:#fff;
     }
 
-    // =========================
-    // 3) Agrupa por posição principal + ordena por overall desc
-    // =========================
-    const teams = Object.values(teamsMap).map(team => {
+    header{
+      background:var(--panel2);
+      border-bottom:2px solid var(--accent);
+    }
 
-      const groups = {
-        "Goleiros": [],
-        "Defensores": [],
-        "Meio-campistas": [],
-        "Atacantes": []
-      };
+    .topbar{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
 
-      for (const player of team.players) {
-        const group = positionGroups[player.primaryPos] || "Meio-campistas";
-        groups[group].push(player);
-      }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
 
-      // Ordenação: overall desc, null por último, depois nome A-Z
-      const sortPlayers = (a, b) => {
-        if (a.overall === null && b.overall !== null) return 1;
-        if (b.overall === null && a.overall !== null) return -1;
-        if (a.overall !== null && b.overall !== null) {
-          if (b.overall !== a.overall) return b.overall - a.overall;
-        }
-        return String(a.name).localeCompare(String(b.name), "pt-BR");
-      };
+    .brandMark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      background:rgba(124,58,237,.16);
+      border:1px solid rgba(124,58,237,.35);
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
 
-      for (const label of Object.keys(groups)) {
-        groups[label].sort(sortPlayers);
-      }
+    .brandText{min-width:0}
+    .brandText h1{margin:0;font-size:16px;letter-spacing:.2px}
+    .brandText p{margin:2px 0 0;color:var(--muted);font-size:12px}
 
-      return {
-        name: team.name,
-        groups: GROUP_ORDER.map(label => ({
-          label,
-          items: groups[label]
-        }))
-      };
-    });
+    nav{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
 
-    // Ordena times A-Z
-    teams.sort((a, b) => String(a.name).localeCompare(String(b.name), "pt-BR"));
+    .navLink{
+      text-decoration:none;
+      color:var(--muted);
+      border:1px solid var(--line);
+      background:rgba(17,24,39,.35);
+      padding:8px 10px;
+      border-radius:12px;
+      font-weight:800;
+      font-size:12px;
+      transition:transform .05s ease;
+      white-space:nowrap;
+    }
+    .navLink:active{transform:translateY(1px)}
 
-    // Total de jogadores efetivamente usados (pós-limpeza)
-    const totalPlayersUsed = teams.reduce(
-      (acc, t) => acc + (t.groups || []).reduce((a2, g) => a2 + (g.items?.length || 0), 0),
-      0
-    );
+    .navLink.active{
+      color:#fff;
+      border-color:rgba(124,58,237,.45);
+      background:rgba(124,58,237,.18);
+    }
 
-    return {
-      teams,
-      totalTeams: teams.length,
-      totalPlayers: totalPlayersUsed
-    };
+    .bar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background:rgba(17,24,39,.35);
+    }
+
+    .input{
+      width:min(520px, 100%);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(18,26,51,.8);
+    }
+    .input input{
+      flex:1;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:#fff;
+      font-size:14px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(18,26,51,.8);
+      color:var(--muted);
+      font-size:12px;
+    }
+    .btn{
+      cursor:pointer;
+      border:none;
+      padding:10px 12px;
+      border-radius:12px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:700;
+      font-size:13px;
+    }
+    .btn:active{transform:translateY(1px)}
+
+    .wrap{max-width:1200px;margin:0 auto}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+      gap:14px;
+      padding:16px;
+    }
+
+    .team{
+      background:var(--panel);
+      border-radius:16px;
+      padding:14px;
+      border:1px solid rgba(124,58,237,.25);
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+    }
+    .teamHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .teamTitle{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    .meta{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .toggle{
+      cursor:pointer;
+      border:1px solid var(--line);
+      background:rgba(17,24,39,.35);
+      color:#fff;
+      border-radius:12px;
+      padding:8px 10px;
+      font-weight:700;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .groups{margin-top:12px;display:none}
+    .team.open .groups{display:block}
+
+    /* =========================
+       ✅ GRUPOS (POSIÇÕES) – MAIS VISÍVEL
+       ========================= */
+
+    .group{
+      margin-top:12px;
+      border-top:1px solid var(--line);
+      padding-top:12px;
+    }
+
+    /* Cabeçalho do grupo MUITO mais forte e com "cara" de seção */
+    .groupHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+
+      padding:10px 12px;
+      margin:0 0 10px 0;
+
+      border:1px solid rgba(124,58,237,.25);
+      border-radius:12px;
+
+      background:rgba(17,24,39,.55);
+      position:relative;
+    }
+
+    /* Barra lateral roxa no cabeçalho do grupo */
+    .groupHead::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:4px;
+      border-radius:12px 0 0 12px;
+      background:var(--accent);
+    }
+
+    /* Título do grupo maior e mais pesado */
+    .groupLabel{
+      margin:0;
+      font-size:15px;
+      font-weight:900;
+      letter-spacing:.2px;
+      color:#fff;
+      padding-left:6px; /* dá espaço pra barra roxa */
+    }
+
+    /* Contador mais "badge" */
+    .count{
+      font-size:12px;
+      color:#fff;
+      border:1px solid rgba(124,58,237,.35);
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(124,58,237,.14);
+      font-weight:800;
+    }
+
+    /* Agora os jogadores ficam "dentro" do grupo (indentação visual) */
+    .player{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+
+      padding:8px 4px;
+      margin-left:10px;              /* <<< recuo pra mostrar hierarquia */
+      padding-left:10px;
+      border-left:2px solid rgba(42,51,90,.9);  /* <<< linha guia do grupo */
+
+      border-bottom:1px dashed rgba(42,51,90,.8);
+      font-size:13px;
+    }
+    .player:last-child{border-bottom:none}
+
+    .left{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+
+    .name{
+      font-weight:700;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:180px;
+    }
+
+    /* Posição (GOL/MC/etc) mais legível */
+    .pos{
+      font-size:13px;
+      color:#fff;
+      border:1px solid var(--line);
+      padding:3px 8px;
+      border-radius:10px;
+      background:rgba(17,24,39,.35);
+      white-space:nowrap;
+      font-weight:800;
+    }
+
+    .ovr{
+      font-weight:900;
+      color:#fff;
+      border:1px solid rgba(124,58,237,.35);
+      background:rgba(124,58,237,.14);
+      padding:2px 8px;
+      border-radius:10px;
+      min-width:46px;
+      text-align:center;
+    }
+    .ovr.null{
+      color:var(--warn);
+      border-color:rgba(251,191,36,.35);
+      background:rgba(251,191,36,.10);
+    }
+
+    .state{
+      padding:18px 16px;
+      color:var(--muted);
+      text-align:center;
+    }
+    .err{
+      color:#fff;
+      border:1px solid rgba(239,68,68,.35);
+      background:rgba(239,68,68,.10);
+      padding:12px;
+      border-radius:14px;
+      display:inline-block;
+      max-width:900px;
+      text-align:left;
+    }
+
+    footer{
+      padding:18px 16px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      border-top:1px solid var(--line);
+    }
+
+    code{color:#fff}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brandMark">C</div>
+      <div class="brandText">
+        <h1>CAMP 2026</h1>
+        <p>Site oficial do campeonato • dados ao vivo via planilha</p>
+      </div>
+    </div>
+
+    <nav aria-label="Menu">
+      <a class="navLink active" href="index.html">Times</a>
+      <a class="navLink" href="trocas.html">Trocas</a>
+      <a class="navLink" href="jogos.html">Jogos</a>
+      <a class="navLink" href="tabela.html">Tabela</a>
+    </nav>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="input" title="Filtrar por time ou jogador">
+    <span style="color:var(--muted);font-size:14px;">🔎</span>
+    <input id="q" placeholder="Buscar por time ou jogador..." />
+  </div>
+
+  <span id="info" class="pill">Carregando…</span>
+  <button id="expandAll" class="btn" type="button">Abrir todos</button>
+  <button id="collapseAll" class="btn" type="button" style="background:rgba(124,58,237,.25);border:1px solid rgba(124,58,237,.35);">Fechar todos</button>
+</div>
+
+<div class="wrap">
+  <div id="state" class="state">Carregando elencos…</div>
+  <div id="grid" class="grid" style="display:none"></div>
+</div>
+
+<footer>
+  Dica: se você hospedar esse HTML em outro domínio, mantenha o header <code>Access-Control-Allow-Origin: *</code> no Pipedream.
+</footer>
+
+<script>
+  // =========================
+  // CONFIG
+  // =========================
+  // 1) Cole sua URL do Pipedream aqui (ou passe via ?api=)
+  const DEFAULT_API_URL = "https://eod2e2u42oodf3z.m.pipedream.net";
+
+  const params = new URLSearchParams(location.search);
+  const API_URL = params.get('api') || DEFAULT_API_URL;
+
+  const elGrid = document.getElementById('grid');
+  const elState = document.getElementById('state');
+  const elInfo = document.getElementById('info');
+  const elQ = document.getElementById('q');
+  const btnExpand = document.getElementById('expandAll');
+  const btnCollapse = document.getElementById('collapseAll');
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#039;');
   }
-});
+
+  function setStateLoading(msg){
+    elState.style.display = 'block';
+    elGrid.style.display = 'none';
+    elState.textContent = msg;
+  }
+
+  function setStateError(msg, hint){
+    elState.style.display = 'block';
+    elGrid.style.display = 'none';
+    elState.innerHTML = `<div class="err"><b>Erro:</b> ${escapeHtml(msg)}<br/><br/>${hint ? escapeHtml(hint) : ''}</div>`;
+  }
+
+  function setStateOk(){
+    elState.style.display = 'none';
+    elGrid.style.display = 'grid';
+  }
+
+  function teamCard(team){
+    const total = (team.groups || []).reduce((acc,g)=>acc + (g.items?.length || 0), 0);
+
+    const groupsHtml = (team.groups || []).map(g => {
+      const items = g.items || [];
+      const playersHtml = items.length
+        ? items.map(p => {
+            const posList = (p.positions || []).join('/');
+            const ovr = (p.overall === null || p.overall === undefined || Number.isNaN(p.overall)) ? null : Number(p.overall);
+            return `
+              <div class="player">
+                <div class="left">
+                  <span class="name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+                  <span class="pos" title="Posições">${escapeHtml(posList || '-') }</span>
+                </div>
+                <span class="ovr ${ovr === null ? 'null' : ''}" title="Overall">${ovr === null ? '—' : ovr}</span>
+              </div>
+            `;
+          }).join('')
+        : `<div style="color:var(--muted);font-size:12px;margin-left:10px;">Sem jogadores nesse grupo</div>`;
+
+      return `
+        <div class="group" data-group="${escapeHtml(g.label)}">
+          <div class="groupHead">
+            <p class="groupLabel">${escapeHtml(g.label)}</p>
+            <span class="count">${items.length}</span>
+          </div>
+          ${playersHtml}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="team" data-team="${escapeHtml(team.name)}">
+        <div class="teamHeader">
+          <div>
+            <h2 class="teamTitle">${escapeHtml(team.name)}</h2>
+            <div class="meta">${total} jogadores</div>
+          </div>
+          <button class="toggle" type="button">Ver elenco</button>
+        </div>
+        <div class="groups">
+          ${groupsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function attachCardHandlers(){
+    elGrid.querySelectorAll('.team').forEach(card => {
+      const btn = card.querySelector('.toggle');
+      btn.addEventListener('click', () => {
+        card.classList.toggle('open');
+        btn.textContent = card.classList.contains('open') ? 'Fechar' : 'Ver elenco';
+      });
+    });
+  }
+
+  function openAll(open){
+    elGrid.querySelectorAll('.team').forEach(card => {
+      card.classList.toggle('open', open);
+      const btn = card.querySelector('.toggle');
+      if (btn) btn.textContent = open ? 'Fechar' : 'Ver elenco';
+    });
+  }
+
+  function applyFilter(){
+    const q = (elQ.value || '').trim().toLowerCase();
+    const cards = Array.from(elGrid.querySelectorAll('.team'));
+
+    let visibleTeams = 0;
+
+    for (const card of cards){
+      const teamName = (card.getAttribute('data-team') || '').toLowerCase();
+      const playersText = card.textContent.toLowerCase();
+      const ok = !q || teamName.includes(q) || playersText.includes(q);
+      card.style.display = ok ? '' : 'none';
+      if (ok) visibleTeams++;
+    }
+
+    elInfo.textContent = `${visibleTeams} times visíveis`;
+  }
+
+  async function load(){
+    if (!API_URL){
+      setStateError(
+        'URL da API não configurada.',
+        'Edite o arquivo e cole sua URL do Pipedream em DEFAULT_API_URL, ou abra este HTML com ?api=SUA_URL.'
+      );
+      elInfo.textContent = 'Sem API';
+      return;
+    }
+
+    setStateLoading('Carregando elencos…');
+    elInfo.textContent = 'Carregando…';
+
+    try{
+      const res = await fetch(API_URL, { method: 'GET' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+
+      const teams = (json.teams || []).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name), 'pt-BR'));
+      elGrid.innerHTML = teams.map(teamCard).join('');
+      attachCardHandlers();
+      setStateOk();
+
+      elInfo.textContent = `${teams.length} times • ${json.totalPlayers ?? '-'} linhas`;
+      applyFilter();
+
+    }catch(err){
+      setStateError(
+        'Não consegui carregar o JSON da API.',
+        `Verifique se a URL está correta e se a resposta está em JSON. Detalhe: ${err.message}`
+      );
+      elInfo.textContent = 'Erro';
+    }
+  }
+
+  // UI
+  elQ.addEventListener('input', applyFilter);
+  btnExpand.addEventListener('click', () => openAll(true));
+  btnCollapse.addEventListener('click', () => openAll(false));
+
+  // Start
+  load();
+</script>
+
+</body>
+</html>
