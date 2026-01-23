@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Campeonato FIFA 26 – Elencos</title>
+  <title>CAMP 2026 – Times</title>
   <style>
     :root{
       --bg:#0b1020;
@@ -26,13 +26,69 @@
     }
 
     header{
-      padding:18px 16px;
-      text-align:center;
       background:var(--panel2);
       border-bottom:2px solid var(--accent);
     }
-    header h1{margin:0 0 6px;font-size:20px}
-    header p{margin:0;color:var(--muted);font-size:13px}
+
+    .topbar{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .brandMark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      background:rgba(124,58,237,.16);
+      border:1px solid rgba(124,58,237,.35);
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+
+    .brandText{min-width:0}
+    .brandText h1{margin:0;font-size:16px;letter-spacing:.2px}
+    .brandText p{margin:2px 0 0;color:var(--muted);font-size:12px}
+
+    nav{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .navLink{
+      text-decoration:none;
+      color:var(--muted);
+      border:1px solid var(--line);
+      background:rgba(17,24,39,.35);
+      padding:8px 10px;
+      border-radius:12px;
+      font-weight:800;
+      font-size:12px;
+      transition:transform .05s ease;
+      white-space:nowrap;
+    }
+    .navLink:active{transform:translateY(1px)}
+
+    .navLink.active{
+      color:#fff;
+      border-color:rgba(124,58,237,.45);
+      background:rgba(124,58,237,.18);
+    }
 
     .bar{
       display:flex;
@@ -284,9 +340,21 @@
 <body>
 
 <header>
-  <div class="wrap">
-    <h1>🏆 Campeonato FIFA – Elencos</h1>
-    <p>Confira seu time e Over, qualquer atualização avisar no grupo</p>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brandMark">C</div>
+      <div class="brandText">
+        <h1>CAMP 2026</h1>
+        <p>Site oficial do campeonato • dados ao vivo via planilha</p>
+      </div>
+    </div>
+
+    <nav aria-label="Menu">
+      <a class="navLink active" href="index.html">Times</a>
+      <a class="navLink" href="trocas.html">Trocas</a>
+      <a class="navLink" href="jogos.html">Jogos</a>
+      <a class="navLink" href="tabela.html">Tabela</a>
+    </nav>
   </div>
 </header>
 
