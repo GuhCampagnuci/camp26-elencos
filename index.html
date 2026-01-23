@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campeonato FIFA – Elencos</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a33;
+      --panel2:#111827;
+      --muted:#9aa3b2;
+      --line:#2a335a;
+      --accent:#7c3aed;
+      --ok:#22c55e;
+      --warn:#fbbf24;
+      --bad:#ef4444;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:#fff;
+    }
+
+    header{
+      padding:18px 16px;
+      text-align:center;
+      background:var(--panel2);
+      border-bottom:2px solid var(--accent);
+    }
+    header h1{margin:0 0 6px;font-size:20px}
+    header p{margin:0;color:var(--muted);font-size:13px}
+
+    .bar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background:rgba(17,24,39,.35);
+    }
+
+    .input{
+      width:min(520px, 100%);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(18,26,51,.8);
+    }
+    .input input{
+      flex:1;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:#fff;
+      font-size:14px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(18,26,51,.8);
+      color:var(--muted);
+      font-size:12px;
+    }
+    .btn{
+      cursor:pointer;
+      border:none;
+      padding:10px 12px;
+      border-radius:12px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:700;
+      font-size:13px;
+    }
+    .btn:active{transform:translateY(1px)}
+
+    .wrap{max-width:1200px;margin:0 auto}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+      gap:14px;
+      padding:16px;
+    }
+
+    .team{
+      background:var(--panel);
+      border-radius:16px;
+      padding:14px;
+      border:1px solid rgba(124,58,237,.25);
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+    }
+    .teamHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .teamTitle{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    .meta{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .toggle{
+      cursor:pointer;
+      border:1px solid var(--line);
+      background:rgba(17,24,39,.35);
+      color:#fff;
+      border-radius:12px;
+      padding:8px 10px;
+      font-weight:700;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .groups{margin-top:12px;display:none}
+    .team.open .groups{display:block}
+
+    .group{
+      margin-top:10px;
+      border-top:1px solid var(--line);
+      padding-top:10px;
+    }
+
+    .groupHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    .groupLabel{
+      margin:0;
+      font-size:13px;
+      color:#fff;
+    }
+
+    .count{
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--line);
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(17,24,39,.35);
+    }
+
+    .player{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:6px 0;
+      border-bottom:1px dashed rgba(42,51,90,.8);
+      font-size:13px;
+    }
+    .player:last-child{border-bottom:none}
+
+    .left{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+
+    .name{
+      font-weight:700;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:180px;
+    }
+
+    .pos{
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--line);
+      padding:2px 6px;
+      border-radius:8px;
+      background:rgba(17,24,39,.35);
+      white-space:nowrap;
+    }
+
+    .ovr{
+      font-weight:900;
+      color:#fff;
+      border:1px solid rgba(124,58,237,.35);
+      background:rgba(124,58,237,.14);
+      padding:2px 8px;
+      border-radius:10px;
+      min-width:46px;
+      text-align:center;
+    }
+    .ovr.null{
+      color:var(--warn);
+      border-color:rgba(251,191,36,.35);
+      background:rgba(251,191,36,.10);
+    }
+
+    .state{
+      padding:18px 16px;
+      color:var(--muted);
+      text-align:center;
+    }
+    .err{
+      color:#fff;
+      border:1px solid rgba(239,68,68,.35);
+      background:rgba(239,68,68,.10);
+      padding:12px;
+      border-radius:14px;
+      display:inline-block;
+      max-width:900px;
+      text-align:left;
+    }
+
+    footer{
+      padding:18px 16px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      border-top:1px solid var(--line);
+    }
+
+    code{color:#fff}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>🏆 Campeonato FIFA – Elencos</h1>
+    <p>Carrega automaticamente do Google Sheets via Pipedream API • organiza por posição e overall</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="input" title="Filtrar por time ou jogador">
+    <span style="color:var(--muted);font-size:14px;">🔎</span>
+    <input id="q" placeholder="Buscar por time ou jogador..." />
+  </div>
+
+  <span id="info" class="pill">Carregando…</span>
+  <button id="expandAll" class="btn" type="button">Abrir todos</button>
+  <button id="collapseAll" class="btn" type="button" style="background:rgba(124,58,237,.25);border:1px solid rgba(124,58,237,.35);">Fechar todos</button>
+</div>
+
+<div class="wrap">
+  <div id="state" class="state">Carregando elencos…</div>
+  <div id="grid" class="grid" style="display:none"></div>
+</div>
+
+<footer>
+  Dica: se você hospedar esse HTML em outro domínio, mantenha o header <code>Access-Control-Allow-Origin: *</code> no Pipedream.
+</footer>
+
+<script>
+  // =========================
+  // CONFIG
+  // =========================
+  // 1) Cole sua URL do Pipedream aqui (ou passe via ?api=)
+  const DEFAULT_API_URL = ""; // ex: "https://eod2eu42oodf3z.m.pipedream.net/"
+
+  const params = new URLSearchParams(location.search);
+  const API_URL = params.get('api') || DEFAULT_API_URL;
+
+  const elGrid = document.getElementById('grid');
+  const elState = document.getElementById('state');
+  const elInfo = document.getElementById('info');
+  const elQ = document.getElementById('q');
+  const btnExpand = document.getElementById('expandAll');
+  const btnCollapse = document.getElementById('collapseAll');
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#039;');
+  }
+
+  function setStateLoading(msg){
+    elState.style.display = 'block';
+    elGrid.style.display = 'none';
+    elState.textContent = msg;
+  }
+
+  function setStateError(msg, hint){
+    elState.style.display = 'block';
+    elGrid.style.display = 'none';
+    elState.innerHTML = `<div class="err"><b>Erro:</b> ${escapeHtml(msg)}<br/><br/>${hint ? escapeHtml(hint) : ''}</div>`;
+  }
+
+  function setStateOk(){
+    elState.style.display = 'none';
+    elGrid.style.display = 'grid';
+  }
+
+  function teamCard(team){
+    const total = (team.groups || []).reduce((acc,g)=>acc + (g.items?.length || 0), 0);
+
+    const groupsHtml = (team.groups || []).map(g => {
+      const items = g.items || [];
+      const playersHtml = items.length
+        ? items.map(p => {
+            const posList = (p.positions || []).join('/');
+            const ovr = (p.overall === null || p.overall === undefined || Number.isNaN(p.overall)) ? null : Number(p.overall);
+            return `
+              <div class="player">
+                <div class="left">
+                  <span class="name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+                  <span class="pos" title="Posições">${escapeHtml(posList || '-') }</span>
+                </div>
+                <span class="ovr ${ovr === null ? 'null' : ''}" title="Overall">${ovr === null ? '—' : ovr}</span>
+              </div>
+            `;
+          }).join('')
+        : `<div style="color:var(--muted);font-size:12px;">Sem jogadores nesse grupo</div>`;
+
+      return `
+        <div class="group" data-group="${escapeHtml(g.label)}">
+          <div class="groupHead">
+            <p class="groupLabel">${escapeHtml(g.label)}</p>
+            <span class="count">${items.length}</span>
+          </div>
+          ${playersHtml}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="team" data-team="${escapeHtml(team.name)}">
+        <div class="teamHeader">
+          <div>
+            <h2 class="teamTitle">${escapeHtml(team.name)}</h2>
+            <div class="meta">${total} jogadores</div>
+          </div>
+          <button class="toggle" type="button">Ver elenco</button>
+        </div>
+        <div class="groups">
+          ${groupsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function attachCardHandlers(){
+    elGrid.querySelectorAll('.team').forEach(card => {
+      const btn = card.querySelector('.toggle');
+      btn.addEventListener('click', () => {
+        card.classList.toggle('open');
+        btn.textContent = card.classList.contains('open') ? 'Fechar' : 'Ver elenco';
+      });
+    });
+  }
+
+  function openAll(open){
+    elGrid.querySelectorAll('.team').forEach(card => {
+      card.classList.toggle('open', open);
+      const btn = card.querySelector('.toggle');
+      if (btn) btn.textContent = open ? 'Fechar' : 'Ver elenco';
+    });
+  }
+
+  function applyFilter(){
+    const q = (elQ.value || '').trim().toLowerCase();
+    const cards = Array.from(elGrid.querySelectorAll('.team'));
+
+    let visibleTeams = 0;
+
+    for (const card of cards){
+      const teamName = (card.getAttribute('data-team') || '').toLowerCase();
+      const playersText = card.textContent.toLowerCase();
+      const ok = !q || teamName.includes(q) || playersText.includes(q);
+      card.style.display = ok ? '' : 'none';
+      if (ok) visibleTeams++;
+    }
+
+    elInfo.textContent = `${visibleTeams} times visíveis`;
+  }
+
+  async function load(){
+    if (!API_URL){
+      setStateError(
+        'URL da API não configurada.',
+        'Edite o arquivo e cole sua URL do Pipedream em DEFAULT_API_URL, ou abra este HTML com ?api=SUA_URL.'
+      );
+      elInfo.textContent = 'Sem API';
+      return;
+    }
+
+    setStateLoading('Carregando elencos…');
+    elInfo.textContent = 'Carregando…';
+
+    try{
+      const res = await fetch(API_URL, { method: 'GET' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+
+      const teams = (json.teams || []).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name), 'pt-BR'));
+      elGrid.innerHTML = teams.map(teamCard).join('');
+      attachCardHandlers();
+      setStateOk();
+
+      elInfo.textContent = `${teams.length} times • ${json.totalPlayers ?? '-'} linhas`;
+      applyFilter();
+
+    }catch(err){
+      setStateError(
+        'Não consegui carregar o JSON da API.',
+        `Verifique se a URL está correta e se a resposta está em JSON. Detalhe: ${err.message}`
+      );
+      elInfo.textContent = 'Erro';
+    }
+  }
+
+  // UI
+  elQ.addEventListener('input', applyFilter);
+  btnExpand.addEventListener('click', () => openAll(true));
+  btnCollapse.addEventListener('click', () => openAll(false));
+
+  // Start
+  load();
+</script>
+
+</body>
+</html>
