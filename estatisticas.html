@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CAMP 2026 — Estatísticas</title>
+
+<style>
+  :root{
+    --bg:#0b0f17;
+    --card:#121a2a;
+    --text:#e7eefc;
+    --muted:#9bb0d1;
+    --line:#22314f;
+    --accent:#7c5cff;
+    --danger:#ff5c7a;
+    --ok:#4ade80;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:system-ui, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding-bottom:84px;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:14px}
+  .card{
+    background: linear-gradient(180deg, rgba(18,26,42,.92), rgba(15,22,38,.92));
+    border:1px solid rgba(34,49,79,.75);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    margin-top: 12px;
+  }
+  .bd{padding:14px}
+
+  header{
+    position: sticky; top:0; z-index:10;
+    backdrop-filter: blur(10px);
+    background: rgba(11,15,23,.65);
+    border-bottom:1px solid rgba(34,49,79,.65);
+  }
+  .top{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .title{font-weight:1000;font-size:16px;letter-spacing:.4px}
+  .api{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 6px 10px; border-radius: 999px;
+    border:1px solid rgba(34,49,79,.85);
+    background: rgba(9,12,18,.55);
+    font-size: 12px; font-weight: 900; color: var(--muted);
+    white-space: nowrap;
+  }
+  .dot{ width:8px; height:8px; border-radius:999px; background: var(--muted); }
+
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-top: 10px;
+  }
+  .tab{
+    flex:1;
+    padding:10px 12px;
+    border-radius: 14px;
+    border:1px solid rgba(34,49,79,.75);
+    background: rgba(9,12,18,.35);
+    color: var(--muted);
+    font-weight:1000;
+    text-align:center;
+    cursor:pointer;
+    user-select:none;
+  }
+  .tab.active{
+    background: rgba(124,92,255,.15);
+    border-color: rgba(124,92,255,.35);
+    color: var(--text);
+  }
+  .hidden{display:none}
+
+  .state{
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    border:1px solid rgba(34,49,79,.75);
+    background: rgba(9,12,18,.40);
+    color: var(--muted);
+    font-size: 13px;
+    white-space: pre-wrap;
+  }
+
+  .match{
+    border:1px solid rgba(34,49,79,.75);
+    background: rgba(9,12,18,.28);
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 10px;
+  }
+  .matchTitle{
+    font-weight: 1000;
+    font-size: 14px;
+    margin:0;
+  }
+  .matchMeta{
+    margin-top:4px;
+    font-size:12px;
+    color: var(--muted);
+  }
+  .line{
+    margin-top:6px;
+    font-size:13px;
+    color: var(--text);
+  }
+  .muted{color: var(--muted);}
+
+  .rank{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 10px 6px;
+    border-bottom: 1px dashed rgba(34,49,79,.55);
+    font-size: 13px;
+  }
+  .rank:last-child{border-bottom:none}
+  .rank b{font-weight:1000}
+  .pill{
+    font-size:12px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border:1px solid rgba(124,92,255,.30);
+    background: rgba(124,92,255,.15);
+    color: var(--text);
+    font-weight: 1000;
+    white-space: nowrap;
+  }
+
+  /* ✅ GRID 2 COLUNAS (PC) / 1 COLUNA (CELULAR) */
+  .statsGrid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  @media(min-width: 860px){
+    .statsGrid{
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+
+  /* MENU MOBILE */
+  nav.mobileNav{
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 74px;
+    background: rgba(11,15,23,.85);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(34,49,79,.6);
+    z-index: 50;
+  }
+  .navWrap{
+    max-width: 1100px;
+    margin: 0 auto;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    padding: 8px 8px;
+  }
+  .navItem{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding: 6px 6px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-size: 10px;
+    user-select:none;
+    text-decoration:none;
+  }
+  .navItem .ico{ font-size: 16px; }
+  .navItem.active{
+    color: var(--text);
+    border-color: rgba(124,92,255,.35);
+    background: rgba(124,92,255,.10);
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">📊 ESTATÍSTICAS</div>
+      <div class="api"><span class="dot" id="apiDot"></span><span id="apiTxt">API</span></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" id="tabPartidas">📅 Partidas</div>
+      <div class="tab" id="tabJogadores">🏅 Jogadores</div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- PARTIDAS -->
+  <div class="card" id="boxPartidas">
+    <div class="bd">
+      <div class="state" id="statePartidas">Carregando partidas…</div>
+      <div id="listaPartidas"></div>
+    </div>
+  </div>
+
+  <!-- JOGADORES -->
+  <div class="card hidden" id="boxJogadores">
+    <div class="bd">
+      <div class="statsGrid">
+        <!-- Artilharia -->
+        <div class="card" style="margin:0;">
+          <div class="bd">
+            <h3 style="margin:0 0 8px;">🥅 Artilharia</h3>
+            <div class="state" id="stateArtilharia">Carregando…</div>
+            <div id="artilharia"></div>
+          </div>
+        </div>
+
+        <!-- Assistências -->
+        <div class="card" style="margin:0;">
+          <div class="bd">
+            <h3 style="margin:0 0 8px;">🎯 Assistências</h3>
+            <div class="state" id="stateAssist">Carregando…</div>
+            <div id="assistencias"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<nav class="mobileNav" aria-label="Menu">
+  <div class="navWrap">
+    <a class="navItem" href="index.html"><div class="ico">🏠</div><div>Início</div></a>
+    <a class="navItem" href="elencos.html"><div class="ico">🧑‍🤝‍🧑</div><div>Elencos</div></a>
+    <a class="navItem" href="disponibilidade.html"><div class="ico">📅</div><div>Disp.</div></a>
+    <a class="navItem" href="desafios.html"><div class="ico">⚔️</div><div>Desafios</div></a>
+    <a class="navItem" href="reportar_partida.html"><div class="ico">📝</div><div>Reportar</div></a>
+    <a class="navItem active" href="estatisticas.html"><div class="ico">📊</div><div>Stats</div></a>
+    <a class="navItem" href="regras.html"><div class="ico">📜</div><div>Regras</div></a>
+  </div>
+</nav>
+
+<script>
+  const API_BASE = "https://script.google.com/macros/s/AKfycbyi1AWCya8OjxVMVWt7JT3CqivvwgKzzRZeH3UQgzQ0Iik3-zTqvgChddwmuKm0E0JLLA/exec";
+
+  const apiDot = document.getElementById("apiDot");
+  const apiTxt = document.getElementById("apiTxt");
+
+  const tabPartidas = document.getElementById("tabPartidas");
+  const tabJogadores = document.getElementById("tabJogadores");
+  const boxPartidas = document.getElementById("boxPartidas");
+  const boxJogadores = document.getElementById("boxJogadores");
+
+  const statePartidas = document.getElementById("statePartidas");
+  const listaPartidas = document.getElementById("listaPartidas");
+
+  const stateArtilharia = document.getElementById("stateArtilharia");
+  const stateAssist = document.getElementById("stateAssist");
+  const artilharia = document.getElementById("artilharia");
+  const assistencias = document.getElementById("assistencias");
+
+  function setApi(ok){
+    apiDot.style.background = ok ? "var(--ok)" : "var(--danger)";
+    apiTxt.textContent = ok ? "API OK" : "API OFF";
+    apiTxt.style.color = ok ? "var(--ok)" : "var(--danger)";
+  }
+
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function jsonp(route, params = {}) {
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Math.random().toString(36).slice(2);
+      const url = new URL(API_BASE);
+      url.searchParams.set("route", route);
+      url.searchParams.set("callback", cb);
+      url.searchParams.set("_ts", Date.now());
+
+      Object.entries(params).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
+      });
+
+      const s = document.createElement("script");
+      s.src = url.toString();
+      s.async = true;
+
+      const t = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 12000);
+
+      function cleanup(){
+        clearTimeout(t);
+        if(s.parentNode) s.parentNode.removeChild(s);
+        try{ delete window[cb]; }catch(_){ window[cb] = undefined; }
+      }
+
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      s.onerror = () => { cleanup(); reject(new Error("load_failed")); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function fmtISODateTime(iso){
+    const s = String(iso || "").trim();
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}:\d{2})$/);
+    if (!m) return s || "—";
+    const dd = m[3], mm = m[2], yyyy = m[1], hhmm = m[4];
+    return `${dd}/${mm}/${yyyy} às ${hhmm}`;
+  }
+
+  function joinList(arr){
+    return (Array.isArray(arr) && arr.length) ? arr.join(", ") : "—";
+  }
+
+  async function loadPartidas(){
+    statePartidas.style.display = "";
+    statePartidas.textContent = "Carregando partidas…";
+    listaPartidas.innerHTML = "";
+
+    try{
+      const r = await jsonp("partidas_list");
+      setApi(true);
+
+      if (!r || !r.ok) {
+        statePartidas.textContent = "⚠️ API respondeu, mas deu erro.\n\nDetalhe: " + (r && r.error ? r.error : "Resposta inválida");
+        return;
+      }
+
+      const list = Array.isArray(r.partidas) ? r.partidas : [];
+      if (list.length === 0) {
+        statePartidas.textContent = "Nenhuma partida reportada ainda.";
+        return;
+      }
+
+      statePartidas.style.display = "none";
+
+      listaPartidas.innerHTML = list.map(p => {
+        const title = `${p.time_a} ${p.gols_a} x ${p.gols_b} ${p.time_b}`;
+        const dt = fmtISODateTime(p.data_partida);
+
+        const les1 = joinList(p.resumo?.lesao_n1);
+        const les2 = joinList(p.resumo?.lesao_n2);
+        const am = joinList(p.resumo?.amarelos);
+        const vm = joinList(p.resumo?.vermelhos);
+
+        return `
+          <div class="match">
+            <div class="matchTitle">${esc(title)}</div>
+            <div class="matchMeta">${esc(dt)}</div>
+
+            <div class="line"><span class="muted">🩹 Lesões nível 1:</span> ${esc(les1)}</div>
+            <div class="line"><span class="muted">🚑 Lesões nível 2:</span> ${esc(les2)}</div>
+            <div class="line"><span class="muted">🟨 Cartões amarelos:</span> ${esc(am)}</div>
+            <div class="line"><span class="muted">🟥 Cartões vermelhos:</span> ${esc(vm)}</div>
+
+            ${p.obs ? `<div class="line"><span class="muted">Obs:</span> ${esc(p.obs)}</div>` : ``}
+          </div>
+        `;
+      }).join("");
+    }catch(err){
+      setApi(false);
+      statePartidas.textContent = "❌ API OFF.\n\nErro: " + (err && err.message ? err.message : String(err));
+    }
+  }
+
+  async function loadJogadores(){
+    stateArtilharia.style.display = "";
+    stateAssist.style.display = "";
+    stateArtilharia.textContent = "Carregando…";
+    stateAssist.textContent = "Carregando…";
+    artilharia.innerHTML = "";
+    assistencias.innerHTML = "";
+
+    try{
+      const r = await jsonp("jogadores_stats");
+      setApi(true);
+
+      if (!r || !r.ok) {
+        stateArtilharia.textContent = "⚠️ Erro ao carregar.";
+        stateAssist.textContent = "⚠️ Erro ao carregar.";
+        return;
+      }
+
+      const art = Array.isArray(r.artilharia) ? r.artilharia : [];
+      const ast = Array.isArray(r.assistencias) ? r.assistencias : [];
+
+      if (art.length === 0) stateArtilharia.textContent = "Sem dados ainda.";
+      else {
+        stateArtilharia.style.display = "none";
+        artilharia.innerHTML = art.map((x, i) => `
+          <div class="rank">
+            <div><b>${i+1}º</b> ${esc(x.jogador)}</div>
+            <div class="pill">${esc(x.total)} gols</div>
+          </div>
+        `).join("");
+      }
+
+      if (ast.length === 0) stateAssist.textContent = "Sem dados ainda.";
+      else {
+        stateAssist.style.display = "none";
+        assistencias.innerHTML = ast.map((x, i) => `
+          <div class="rank">
+            <div><b>${i+1}º</b> ${esc(x.jogador)}</div>
+            <div class="pill">${esc(x.total)} ast</div>
+          </div>
+        `).join("");
+      }
+
+    }catch(err){
+      setApi(false);
+      stateArtilharia.textContent = "❌ API OFF.";
+      stateAssist.textContent = "❌ API OFF.";
+    }
+  }
+
+  // Tabs
+  tabPartidas.addEventListener("click", () => {
+    tabPartidas.classList.add("active");
+    tabJogadores.classList.remove("active");
+    boxPartidas.classList.remove("hidden");
+    boxJogadores.classList.add("hidden");
+  });
+  tabJogadores.addEventListener("click", () => {
+    tabJogadores.classList.add("active");
+    tabPartidas.classList.remove("active");
+    boxJogadores.classList.remove("hidden");
+    boxPartidas.classList.add("hidden");
+  });
+
+  loadPartidas();
+  loadJogadores();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CAMP 2026 — Reportar Partida</title>
+
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --card:#121a2a;
+      --text:#e7eefc;
+      --muted:#9bb0d1;
+      --line:#22314f;
+      --accent:#7c5cff;
+      --danger:#ff5c7a;
+      --ok:#4ade80;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(124,92,255,.25), transparent 60%),
+                  radial-gradient(900px 500px at 90% 0%, rgba(124,92,255,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding-bottom: 84px;
+    }
+    a{ color: inherit; text-decoration:none; }
+
+    header{
+      position: sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,23,.65);
+      border-bottom:1px solid rgba(34,49,79,.65);
+    }
+    .wrap{ max-width: 1100px; margin: 0 auto; padding: 14px; }
+
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .title{
+      font-weight: 1000; letter-spacing:.4px;
+      font-size: 16px;
+    }
+    .api{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px; border-radius: 999px;
+      border:1px solid rgba(34,49,79,.85);
+      background: rgba(9,12,18,.55);
+      font-size: 12px; font-weight: 900; color: var(--muted);
+      white-space: nowrap;
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background: var(--muted); }
+
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,42,.92), rgba(15,22,38,.92));
+      border:1px solid rgba(34,49,79,.75);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      margin-top: 12px;
+    }
+    .bd{ padding: 14px; }
+
+    label{ display:block; font-size:12px; font-weight:900; color:var(--muted); margin: 10px 0 6px; }
+    select, input, textarea{
+      width:100%;
+      padding: 12px;
+      border-radius: 14px;
+      border:1px solid rgba(34,49,79,.75);
+      background: rgba(9,12,18,.35);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    textarea{ min-height: 84px; resize: vertical; }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media(min-width: 840px){
+      .row{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .miniRow{
+      display:grid;
+      grid-template-columns: 1fr 110px;
+      gap: 10px;
+      align-items:end;
+    }
+
+    .btn{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 1000;
+      border: 1px solid rgba(124,92,255,.35);
+      background: rgba(124,92,255,.15);
+      color: var(--text);
+      cursor:pointer;
+    }
+    .btn.secondary{
+      border-color: rgba(34,49,79,.75);
+      background: rgba(9,12,18,.35);
+      color: var(--muted);
+    }
+    .btn.danger{
+      border-color: rgba(255,92,122,.35);
+      background: rgba(255,92,122,.12);
+    }
+
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .statusBox{
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border:1px solid rgba(34,49,79,.75);
+      background: rgba(9,12,18,.40);
+      color: var(--muted);
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    .score{
+      display:grid;
+      grid-template-columns: 1fr 90px 34px 90px 1fr;
+      gap: 10px;
+      align-items:center;
+      margin-top: 12px;
+    }
+    .score .x{
+      text-align:center;
+      font-weight: 1000;
+      color: var(--muted);
+    }
+    .score input{
+      text-align:center;
+      font-weight: 1000;
+    }
+
+    .tables{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media(min-width: 900px){
+      .tables{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .subTitle{
+      font-size: 13px;
+      font-weight: 1000;
+      margin: 6px 0 10px;
+      color: var(--text);
+    }
+
+    .playerRow{
+      border: 1px solid rgba(34,49,79,.65);
+      background: rgba(9,12,18,.28);
+      border-radius: 14px;
+      padding: 10px;
+      margin-top: 10px;
+      display:grid;
+      gap: 10px;
+    }
+    .playerTop{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      align-items:center;
+    }
+    .playerName{
+      font-weight: 1000;
+      font-size: 13px;
+      line-height: 1.1;
+    }
+    .playerMeta{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .statsGrid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    @media(min-width: 520px){
+      .statsGrid{ grid-template-columns: repeat(5, 1fr); }
+    }
+    .statsGrid input, .statsGrid select{
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    nav.mobileNav{
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 74px;
+      background: rgba(11,15,23,.85);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(34,49,79,.6);
+      z-index: 50;
+    }
+    .navWrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      padding: 8px 8px;
+    }
+    .navItem{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      padding: 6px 6px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-size: 10px;
+      user-select:none;
+    }
+    .navItem .ico{ font-size: 16px; }
+    .navItem.active{
+      color: var(--text);
+      border-color: rgba(124,92,255,.35);
+      background: rgba(124,92,255,.10);
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">📝 REPORTAR PARTIDA</div>
+      <div class="api"><span class="dot" id="apiDot"></span><span id="apiTxt">API</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="card">
+    <div class="bd">
+
+      <div class="row">
+        <div>
+          <label>Time A</label>
+          <select id="timeA"></select>
+        </div>
+        <div>
+          <label>Time B</label>
+          <select id="timeB"></select>
+        </div>
+      </div>
+
+      <div class="score">
+        <div class="hint" id="lblA">—</div>
+        <input id="golsA" type="number" min="0" value="0">
+        <div class="x">x</div>
+        <input id="golsB" type="number" min="0" value="0">
+        <div class="hint" id="lblB">—</div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Data (opcional)</label>
+          <input id="dataPartida" type="date">
+          <div class="hint">Se deixar vazio, usa a data de hoje.</div>
+        </div>
+        <div>
+          <label>Hora (opcional)</label>
+          <input id="horaPartida" type="time">
+          <div class="hint">Se deixar vazio, usa a hora atual.</div>
+        </div>
+      </div>
+
+      <label>Observação (opcional)</label>
+      <textarea id="obs" placeholder="Ex: jogo travou, foi replay, etc..."></textarea>
+
+      <div class="tables">
+        <div class="card" style="margin:0;">
+          <div class="bd">
+            <div class="subTitle" id="titleA">Time A — Jogadores</div>
+
+            <div class="miniRow">
+              <div>
+                <label>Adicionar jogador (Time A)</label>
+                <select id="addA"></select>
+              </div>
+              <button class="btn secondary" id="btnAddA" type="button">Adicionar</button>
+            </div>
+
+            <div id="listA"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="bd">
+            <div class="subTitle" id="titleB">Time B — Jogadores</div>
+
+            <div class="miniRow">
+              <div>
+                <label>Adicionar jogador (Time B)</label>
+                <select id="addB"></select>
+              </div>
+              <button class="btn secondary" id="btnAddB" type="button">Adicionar</button>
+            </div>
+
+            <div id="listB"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button class="btn" id="btnSend" type="button">✅ Reportar Partida</button>
+      </div>
+
+      <div class="statusBox" id="status">Carregando times…</div>
+
+    </div>
+  </div>
+</main>
+
+<nav class="mobileNav" aria-label="Menu">
+  <div class="navWrap">
+    <a class="navItem" href="index.html" title="Início"><div class="ico">🏠</div><div>Início</div></a>
+    <a class="navItem" href="elencos.html" title="Elencos"><div class="ico">🧑‍🤝‍🧑</div><div>Elencos</div></a>
+    <a class="navItem" href="disponibilidade.html" title="Disponibilidade"><div class="ico">📅</div><div>Disp.</div></a>
+    <a class="navItem" href="desafios.html" title="Desafios"><div class="ico">⚔️</div><div>Desafios</div></a>
+    <a class="navItem active" href="reportar_partida.html" title="Reportar partida"><div class="ico">📝</div><div>Reportar</div></a>
+    <a class="navItem" href="estatisticas.html" title="Estatísticas"><div class="ico">📊</div><div>Stats</div></a>
+    <a class="navItem" href="regras.html" title="Regras"><div class="ico">📜</div><div>Regras</div></a>
+  </div>
+</nav>
+
+<script>
+  const API_BASE = "https://script.google.com/macros/s/AKfycbyi1AWCya8OjxVMVWt7JT3CqivvwgKzzRZeH3UQgzQ0Iik3-zTqvgChddwmuKm0E0JLLA/exec";
+
+  const apiDot = document.getElementById("apiDot");
+  const apiTxt = document.getElementById("apiTxt");
+  const statusBox = document.getElementById("status");
+
+  const timeA = document.getElementById("timeA");
+  const timeB = document.getElementById("timeB");
+  const lblA = document.getElementById("lblA");
+  const lblB = document.getElementById("lblB");
+
+  const golsA = document.getElementById("golsA");
+  const golsB = document.getElementById("golsB");
+
+  const dataPartida = document.getElementById("dataPartida");
+  const horaPartida = document.getElementById("horaPartida");
+  const obs = document.getElementById("obs");
+
+  const addA = document.getElementById("addA");
+  const addB = document.getElementById("addB");
+  const btnAddA = document.getElementById("btnAddA");
+  const btnAddB = document.getElementById("btnAddB");
+  const listA = document.getElementById("listA");
+  const listB = document.getElementById("listB");
+
+  const titleA = document.getElementById("titleA");
+  const titleB = document.getElementById("titleB");
+
+  const btnSend = document.getElementById("btnSend");
+
+  let cacheElencoA = [];
+  let cacheElencoB = [];
+  let selectedA = new Map(); // jogador -> stats
+  let selectedB = new Map();
+
+  function setApi(ok){
+    apiDot.style.background = ok ? "var(--ok)" : "var(--danger)";
+    apiTxt.textContent = ok ? "API OK" : "API OFF";
+    apiTxt.style.color = ok ? "var(--ok)" : "var(--danger)";
+  }
+
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function jsonp(route, params = {}) {
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Math.random().toString(36).slice(2);
+      const url = new URL(API_BASE);
+      url.searchParams.set("route", route);
+      url.searchParams.set("callback", cb);
+      url.searchParams.set("_ts", Date.now());
+
+      Object.entries(params).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
+      });
+
+      const s = document.createElement("script");
+      s.src = url.toString();
+      s.async = true;
+
+      const t = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 12000);
+
+      function cleanup(){
+        clearTimeout(t);
+        if(s.parentNode) s.parentNode.removeChild(s);
+        try{ delete window[cb]; }catch(_){ window[cb] = undefined; }
+      }
+
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      s.onerror = () => { cleanup(); reject(new Error("load_failed")); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function fillSelect(select, items, placeholder="Selecione..."){
+    select.innerHTML = "";
+    const op0 = document.createElement("option");
+    op0.value = "";
+    op0.textContent = placeholder;
+    select.appendChild(op0);
+
+    items.forEach(v => {
+      const op = document.createElement("option");
+      op.value = v;
+      op.textContent = v;
+      select.appendChild(op);
+    });
+  }
+
+  function fillPlayersSelect(select, elenco, mapSelected){
+    select.innerHTML = "";
+    const op0 = document.createElement("option");
+    op0.value = "";
+    op0.textContent = "Selecione jogador...";
+    select.appendChild(op0);
+
+    elenco.forEach(p => {
+      const name = p.name;
+      if (mapSelected.has(name)) return;
+
+      const op = document.createElement("option");
+      op.value = name;
+      op.textContent = `${name} (${p.overall ?? "—"})`;
+      select.appendChild(op);
+    });
+  }
+
+  function defaultStats(){
+    return { gols:0, assistencias:0, amarelos:0, vermelhos:0, lesao_nivel:0 };
+  }
+
+  function renderList(listEl, mapSelected){
+    if (mapSelected.size === 0) {
+      listEl.innerHTML = `<div class="hint" style="margin-top:10px;">Nenhum jogador adicionado ainda.</div>`;
+      return;
+    }
+
+    let html = "";
+    for (const [jogador, st] of mapSelected.entries()) {
+      html += `
+        <div class="playerRow" data-jog="${esc(jogador)}">
+          <div class="playerTop">
+            <div>
+              <div class="playerName">${esc(jogador)}</div>
+              <div class="playerMeta">Preencha stats do jogador</div>
+            </div>
+            <button class="btn danger btnRemove" type="button" data-jog="${esc(jogador)}">Remover</button>
+          </div>
+
+          <div class="statsGrid">
+            <div>
+              <label style="margin:0 0 6px;">Gols</label>
+              <input type="number" min="0" class="inpGols" value="${st.gols}">
+            </div>
+            <div>
+              <label style="margin:0 0 6px;">Assist.</label>
+              <input type="number" min="0" class="inpAst" value="${st.assistencias}">
+            </div>
+            <div>
+              <label style="margin:0 0 6px;">Amarelo</label>
+              <input type="number" min="0" class="inpAm" value="${st.amarelos}">
+            </div>
+            <div>
+              <label style="margin:0 0 6px;">Vermelho</label>
+              <select class="selVm">
+                <option value="0" ${String(st.vermelhos)==="0"?"selected":""}>0</option>
+                <option value="1" ${String(st.vermelhos)==="1"?"selected":""}>1</option>
+              </select>
+            </div>
+            <div>
+              <label style="margin:0 0 6px;">Lesão</label>
+              <select class="selLs">
+                <option value="0" ${String(st.lesao_nivel)==="0"?"selected":""}>0</option>
+                <option value="1" ${String(st.lesao_nivel)==="1"?"selected":""}>1</option>
+                <option value="2" ${String(st.lesao_nivel)==="2"?"selected":""}>2</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    listEl.innerHTML = html;
+
+    // binds inputs
+    listEl.querySelectorAll(".playerRow").forEach(row => {
+      const jog = row.getAttribute("data-jog");
+
+      const inpG = row.querySelector(".inpGols");
+      const inpA = row.querySelector(".inpAst");
+      const inpAm = row.querySelector(".inpAm");
+      const selV = row.querySelector(".selVm");
+      const selL = row.querySelector(".selLs");
+
+      const update = () => {
+        const st = mapSelected.get(jog) || defaultStats();
+        st.gols = Math.max(0, parseInt(inpG.value||"0",10) || 0);
+        st.assistencias = Math.max(0, parseInt(inpA.value||"0",10) || 0);
+        st.amarelos = Math.max(0, parseInt(inpAm.value||"0",10) || 0);
+        st.vermelhos = (selV.value === "1") ? 1 : 0;
+        st.lesao_nivel = (selL.value === "2") ? 2 : (selL.value === "1" ? 1 : 0);
+        mapSelected.set(jog, st);
+      };
+
+      [inpG, inpA, inpAm, selV, selL].forEach(el => el.addEventListener("change", update));
+      [inpG, inpA, inpAm].forEach(el => el.addEventListener("input", update));
+    });
+
+    // remove buttons
+    listEl.querySelectorAll(".btnRemove").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const jog = btn.getAttribute("data-jog");
+        mapSelected.delete(jog);
+        // re-render handled outside
+      });
+    });
+  }
+
+  function rerender(){
+    fillPlayersSelect(addA, cacheElencoA, selectedA);
+    fillPlayersSelect(addB, cacheElencoB, selectedB);
+
+    renderList(listA, selectedA);
+    renderList(listB, selectedB);
+
+    // rebind remove because renderList resets HTML
+    listA.querySelectorAll(".btnRemove").forEach(b => {
+      b.addEventListener("click", () => { selectedA.delete(b.getAttribute("data-jog")); rerender(); });
+    });
+    listB.querySelectorAll(".btnRemove").forEach(b => {
+      b.addEventListener("click", () => { selectedB.delete(b.getAttribute("data-jog")); rerender(); });
+    });
+  }
+
+  async function loadTeams(){
+    try{
+      statusBox.textContent = "Carregando times...";
+      const r = await jsonp("teams");
+      setApi(true);
+
+      if (!r || !r.ok) {
+        statusBox.textContent = "⚠️ API respondeu, mas deu erro.\n\nDetalhe: " + (r && r.error ? r.error : "resposta inválida");
+        return;
+      }
+
+      fillSelect(timeA, r.teams, "Selecione o Time A");
+      fillSelect(timeB, r.teams, "Selecione o Time B");
+
+      statusBox.textContent = "Selecione Time A e Time B para carregar os elencos.";
+    } catch (err) {
+      setApi(false);
+      statusBox.textContent = "❌ API OFF.\n\nErro: " + (err && err.message ? err.message : String(err));
+    }
+  }
+
+  async function loadElencoFor(time, which){
+    if (!time) return [];
+
+    const r = await jsonp("elenco_time", { time });
+    if (!r || !r.ok) throw new Error(r && r.error ? r.error : "Resposta inválida");
+    return Array.isArray(r.jogadores) ? r.jogadores : [];
+  }
+
+  async function onTeamsChanged(){
+    const a = timeA.value;
+    const b = timeB.value;
+
+    lblA.textContent = a || "—";
+    lblB.textContent = b || "—";
+    titleA.textContent = (a ? a : "Time A") + " — Jogadores";
+    titleB.textContent = (b ? b : "Time B") + " — Jogadores";
+
+    selectedA = new Map();
+    selectedB = new Map();
+    cacheElencoA = [];
+    cacheElencoB = [];
+    rerender();
+
+    if (!a || !b) {
+      statusBox.textContent = "Selecione Time A e Time B.";
+      return;
+    }
+    if (a === b) {
+      statusBox.textContent = "⚠️ Escolha times diferentes.";
+      return;
+    }
+
+    try{
+      statusBox.textContent = "Carregando elencos...";
+      cacheElencoA = await loadElencoFor(a, "A");
+      cacheElencoB = await loadElencoFor(b, "B");
+
+      rerender();
+      statusBox.textContent = "Elencos carregados. Adicione os jogadores que participaram e preencha os stats.";
+    } catch (err) {
+      statusBox.textContent = "❌ Erro ao carregar elenco.\n\nDetalhe: " + (err && err.message ? err.message : String(err));
+    }
+  }
+
+  btnAddA.addEventListener("click", () => {
+    const j = addA.value;
+    if (!j) return;
+    if (!selectedA.has(j)) selectedA.set(j, defaultStats());
+    rerender();
+  });
+
+  btnAddB.addEventListener("click", () => {
+    const j = addB.value;
+    if (!j) return;
+    if (!selectedB.has(j)) selectedB.set(j, defaultStats());
+    rerender();
+  });
+
+  timeA.addEventListener("change", onTeamsChanged);
+  timeB.addEventListener("change", onTeamsChanged);
+
+  btnSend.addEventListener("click", async () => {
+    const a = timeA.value;
+    const b = timeB.value;
+
+    if (!a || !b) { statusBox.textContent = "⚠️ Selecione Time A e Time B."; return; }
+    if (a === b) { statusBox.textContent = "⚠️ Times precisam ser diferentes."; return; }
+
+    const ga = Math.max(0, parseInt(golsA.value||"0", 10) || 0);
+    const gb = Math.max(0, parseInt(golsB.value||"0", 10) || 0);
+
+    // monta payload de stats
+    const arrA = [];
+    for (const [jog, st] of selectedA.entries()) arrA.push({ jogador: jog, ...st });
+
+    const arrB = [];
+    for (const [jog, st] of selectedB.entries()) arrB.push({ jogador: jog, ...st });
+
+    const stats = { time_a: arrA, time_b: arrB };
+    const statsJson = encodeURIComponent(JSON.stringify(stats));
+
+    statusBox.textContent = "Enviando partida...";
+    btnSend.disabled = true;
+    btnSend.textContent = "Enviando...";
+
+    try{
+      const r = await jsonp("partida_create", {
+        time_a: a,
+        gols_a: String(ga),
+        time_b: b,
+        gols_b: String(gb),
+        data_partida: dataPartida.value || "",
+        hora_partida: horaPartida.value || "",
+        obs: obs.value || "",
+        stats_json: statsJson
+      });
+
+      if (!r || !r.ok) {
+        statusBox.textContent = "❌ Não salvou.\n\nDetalhe: " + (r && r.error ? r.error : "Resposta inválida");
+        return;
+      }
+
+      statusBox.textContent =
+        "✅ Partida reportada!\n\n" +
+        `${a} ${ga} x ${gb} ${b}\n` +
+        `Partida ID: ${r.partida_id}\n` +
+        `Jogadores salvos: ${r.total_jogadores}`;
+
+      // reset básico
+      selectedA = new Map();
+      selectedB = new Map();
+      rerender();
+      golsA.value = "0";
+      golsB.value = "0";
+      obs.value = "";
+      dataPartida.value = "";
+      horaPartida.value = "";
+    } catch (err) {
+      statusBox.textContent = "❌ Erro ao enviar.\n\nDetalhe: " + (err && err.message ? err.message : String(err));
+    } finally {
+      btnSend.disabled = false;
+      btnSend.textContent = "✅ Reportar Partida";
+    }
+  });
+
+  loadTeams();
+</script>
+</body>
+</html>

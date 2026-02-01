@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAMP 2026 — Desafios</title>
+
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --card:#121a2a;
+      --text:#e7eefc;
+      --muted:#9bb0d1;
+      --line:#22314f;
+      --accent:#7c5cff;
+      --danger:#ff5c7a;
+      --ok:#4ade80;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(124,92,255,.25), transparent 60%),
+                  radial-gradient(900px 500px at 90% 0%, rgba(124,92,255,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding-bottom: 84px;
+    }
+    a{ color: inherit; text-decoration:none; }
+
+    header{
+      position: sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,23,.65);
+      border-bottom:1px solid rgba(34,49,79,.65);
+    }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 14px; }
+
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .title{
+      font-weight: 900; letter-spacing:.4px;
+      font-size: 16px;
+    }
+    .api{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px; border-radius: 999px;
+      border:1px solid rgba(34,49,79,.85);
+      background: rgba(9,12,18,.55);
+      font-size: 12px; font-weight: 800; color: var(--muted);
+      white-space: nowrap;
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background: var(--muted); }
+
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,42,.92), rgba(15,22,38,.92));
+      border:1px solid rgba(34,49,79,.75);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      margin-top: 12px;
+    }
+    .bd{ padding: 14px; }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    @media (min-width: 720px){
+      .row2{ grid-template-columns: 1fr 1fr; }
+    }
+
+    select, input, textarea, button{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(34,49,79,.85);
+      background: rgba(9,12,18,.65);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    textarea{ min-height: 80px; resize: vertical; }
+
+    button{
+      cursor:pointer;
+      border: 0;
+      background: var(--accent);
+      font-weight: 900;
+      color: #0b0f17;
+    }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .small{ font-size: 12px; color: var(--muted); }
+    .sep{ height:1px; background: rgba(34,49,79,.6); margin: 12px 0; }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 12px;
+      border:1px solid rgba(34,49,79,.75);
+      background: rgba(9,12,18,.35);
+    }
+    th, td{
+      padding: 10px 10px;
+      border-bottom:1px solid rgba(34,49,79,.55);
+      font-size: 14px;
+    }
+    th{
+      text-align:left;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing:.3px;
+    }
+    tr:last-child td{ border-bottom:0; }
+
+    .toast{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(34,49,79,.8);
+      background: rgba(9,12,18,.55);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .toast.ok{ border-color: rgba(74,222,128,.35); color: #bff4d0; }
+    .toast.err{ border-color: rgba(255,92,122,.35); color: #ffd0d9; }
+
+    .challenge{
+      border:1px solid rgba(34,49,79,.75);
+      background: rgba(9,12,18,.35);
+      border-radius: 14px;
+      padding: 12px;
+      display:grid;
+      gap:6px;
+    }
+    .challenge b{ letter-spacing:.3px; }
+    .status{
+      font-weight: 900;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    nav.mobileNav{
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 74px;
+      background: rgba(11,15,23,.85);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(34,49,79,.6);
+      z-index: 50;
+    }
+    .navWrap{
+      max-width: 980px;
+      margin: 0 auto;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      padding: 8px 8px;
+    }
+    .navItem{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      padding: 6px 6px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-size: 10px;
+      user-select:none;
+    }
+    .navItem .ico{ font-size: 16px; }
+    .navItem.active{
+      color: var(--text);
+      border-color: rgba(124,92,255,.35);
+      background: rgba(124,92,255,.10);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <div class="title">DESAFIOS</div>
+        <div class="api"><span class="dot" id="apiDot"></span><span id="apiTxt">API</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <div class="bd">
+        <div class="row2">
+          <div>
+            <div class="small">TIME DESAFIANTE</div>
+            <select id="desafiante"></select>
+          </div>
+          <div>
+            <div class="small">TIME DESAFIADO</div>
+            <select id="desafiado"></select>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="small" style="margin-bottom:8px;">DISPONIBILIDADE DO DESAFIADO</div>
+        <div id="availArea"></div>
+
+        <div class="sep"></div>
+
+        <div class="row2">
+          <div>
+            <div class="small">DATA</div>
+            <input id="dataJogo" type="date" />
+          </div>
+          <div>
+            <div class="small">HORA</div>
+            <input id="horaJogo" type="time" />
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="small">MENSAGEM</div>
+          <textarea id="mensagem" placeholder="Opcional..."></textarea>
+        </div>
+
+        <div style="margin-top:10px;">
+          <button id="btnEnviar">ENVIAR</button>
+        </div>
+
+        <div id="toast" class="toast" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="bd">
+        <div class="small" style="margin-bottom:10px;">DESAFIOS ROLANDO</div>
+        <div id="list" style="display:grid; gap:10px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobileNav" aria-label="Menu">
+    <div class="navWrap">
+      <a class="navItem" href="index.html" title="Início"><div class="ico">🏠</div><div>Início</div></a>
+      <a class="navItem" href="elencos.html" title="Elencos"><div class="ico">🧑‍🤝‍🧑</div><div>Elencos</div></a>
+      <a class="navItem" href="disponibilidade.html" title="Disponibilidade"><div class="ico">📅</div><div>Disp.</div></a>
+      <a class="navItem active" href="desafios.html" title="Desafios"><div class="ico">⚔️</div><div>Desafios</div></a>
+      <a class="navItem" href="reportar_partida.html" title="Reportar partida"><div class="ico">📝</div><div>Reportar</div></a>
+      <a class="navItem" href="estatisticas.html" title="Estatísticas"><div class="ico">📊</div><div>Stats</div></a>
+      <a class="navItem" href="regras.html" title="Regras"><div class="ico">📜</div><div>Regras</div></a>
+    </div>
+  </nav>
+
+  <script>
+    const API_BASE = "https://script.google.com/macros/s/AKfycbyi1AWCya8OjxVMVWt7JT3CqivvwgKzzRZeH3UQgzQ0Iik3-zTqvgChddwmuKm0E0JLLA/exec";
+
+    const apiDot = document.getElementById("apiDot");
+    const apiTxt = document.getElementById("apiTxt");
+
+    const elDesafiante = document.getElementById("desafiante");
+    const elDesafiado = document.getElementById("desafiado");
+    const elData = document.getElementById("dataJogo");
+    const elHora = document.getElementById("horaJogo");
+    const elMsg = document.getElementById("mensagem");
+    const btnEnviar = document.getElementById("btnEnviar");
+    const toast = document.getElementById("toast");
+
+    const availArea = document.getElementById("availArea");
+    const list = document.getElementById("list");
+
+    function setApi(ok){
+      apiDot.style.background = ok ? "var(--ok)" : "var(--danger)";
+      apiTxt.textContent = ok ? "API OK" : "API OFF";
+      apiTxt.style.color = ok ? "var(--ok)" : "var(--danger)";
+    }
+
+    function showToast(msg, type){
+      toast.style.display = "block";
+      toast.textContent = msg;
+      toast.classList.remove("ok","err");
+      toast.classList.add(type === "ok" ? "ok" : "err");
+    }
+    function hideToast(){
+      toast.style.display = "none";
+      toast.textContent = "";
+      toast.classList.remove("ok","err");
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    // ✅ Formata qualquer hora do Sheets para HH:MM
+    function fmtTime(val){
+      if(val === null || val === undefined) return "";
+      const s = String(val).trim();
+      const m1 = s.match(/\b(\d{2}):(\d{2})\b/);
+      if (m1) return `${m1[1]}:${m1[2]}`;
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        const hh = String(d.getHours()).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        return `${hh}:${mm}`;
+      }
+      return s;
+    }
+
+    // ✅ Formata data para DD/MM/AAAA
+    function fmtDateBR(val){
+      if(!val) return "";
+      const s = String(val).trim();
+      const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(m) return `${m[3]}/${m[2]}/${m[1]}`;
+      const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+      if(m2) return `${m2[3]}/${m2[2]}/${m2[1]}`;
+      const d = new Date(s);
+      if(!isNaN(d.getTime())){
+        const dd = String(d.getDate()).padStart(2,"0");
+        const mm = String(d.getMonth()+1).padStart(2,"0");
+        const yy = String(d.getFullYear());
+        return `${dd}/${mm}/${yy}`;
+      }
+      return s;
+    }
+
+    // JSONP
+    function jsonp(route, params = {}) {
+      return new Promise((resolve, reject) => {
+        const cb = "cb_" + Math.random().toString(36).slice(2);
+        const url = new URL(API_BASE);
+        url.searchParams.set("route", route);
+        url.searchParams.set("callback", cb);
+        url.searchParams.set("_ts", Date.now());
+        Object.entries(params).forEach(([k,v]) => {
+          if (v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
+        });
+
+        const s = document.createElement("script");
+        s.src = url.toString();
+        s.async = true;
+
+        const t = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 12000);
+
+        function cleanup(){
+          clearTimeout(t);
+          if(s.parentNode) s.parentNode.removeChild(s);
+          try{ delete window[cb]; }catch(_){ window[cb] = undefined; }
+        }
+
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error("load_failed")); };
+
+        document.head.appendChild(s);
+      });
+    }
+
+    async function apiGet(route, params){ return jsonp(route, params || {}); }
+    async function apiPost(route, params){ return jsonp(route, params || {}); }
+
+    function renderAvailability(rows){
+      if(!rows || !rows.length){
+        availArea.innerHTML = `<div class="small">Sem disponibilidade cadastrada.</div>`;
+        return;
+      }
+
+      // ordenação por dia
+      const norm = (x) => String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const idx = (dia) => {
+        const d = norm(dia);
+        if(d.startsWith("seg")) return 0;
+        if(d.startsWith("ter")) return 1;
+        if(d.startsWith("qua")) return 2;
+        if(d.startsWith("qui")) return 3;
+        if(d.startsWith("sex")) return 4;
+        if(d.startsWith("sab")) return 5;
+        if(d.startsWith("dom")) return 6;
+        return 99;
+      };
+
+      const sorted = [...rows].sort((a,b) => idx(a.dias) - idx(b.dias));
+
+      let html = `<table>
+        <thead><tr><th>DIA</th><th>HORÁRIO</th></tr></thead><tbody>`;
+
+      sorted.forEach(r => {
+        const dia = escapeHtml(r.dias);
+        const ini = escapeHtml(fmtTime(r.inicio));
+        const fim = escapeHtml(fmtTime(r.fim));
+        html += `<tr><td>${dia}</td><td>${ini} às ${fim}</td></tr>`;
+      });
+
+      html += `</tbody></table>`;
+      availArea.innerHTML = html;
+    }
+
+    async function loadTeams(){
+      const r = await apiGet("teams");
+      if(!r.ok) throw new Error(r.error || "teams_error");
+
+      const teams = r.teams || [];
+      elDesafiante.innerHTML = `<option value="">Selecione...</option>` + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+      elDesafiado.innerHTML  = `<option value="">Selecione...</option>` + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+    }
+
+    async function loadAvailability(){
+      const t = elDesafiado.value;
+      if(!t){
+        availArea.innerHTML = `<div class="small">Selecione o time desafiado.</div>`;
+        return;
+      }
+      const r = await apiGet("disponibilidade", { time: t });
+      if(!r.ok){
+        availArea.innerHTML = `<div class="small">Erro: ${escapeHtml(r.error || "falha")}</div>`;
+        return;
+      }
+      renderAvailability(r.disponibilidade || []);
+    }
+
+    function normalizeStatus(s){
+      const x = String(s||"").toUpperCase();
+      if(x === "PENDENTE") return "Pendente";
+      if(x === "ACEITO") return "Aceito";
+      if(x === "RECUSADO") return "Negado";
+      if(x === "CANCELADO") return "Cancelado";
+      return s || "-";
+    }
+
+    async function loadChallenges(){
+      const r = await apiGet("desafios_list");
+      if(!r.ok){
+        list.innerHTML = `<div class="small">Erro ao carregar desafios.</div>`;
+        return;
+      }
+
+      const items = r.desafios || [];
+      if(!items.length){
+        list.innerHTML = `<div class="small">Nenhum desafio ainda.</div>`;
+        return;
+      }
+
+      list.innerHTML = items.map(ch => {
+        const line1 = `Desafiante: <b>${escapeHtml(ch.desafiante)}</b> vs <b>${escapeHtml(ch.desafiado)}</b> Desafiado`;
+        const dt = fmtDateBR(ch.data_jogo);
+        const hr = fmtTime(ch.hora_jogo);
+        const line2 = `${escapeHtml(dt)} às ${escapeHtml(hr)}`.trim();
+        const line3 = `Status: ${escapeHtml(normalizeStatus(ch.status))}`;
+
+        const msg = (ch.mensagem && String(ch.mensagem).trim()) ? String(ch.mensagem).trim() : "";
+        const line4 = msg ? `Mensagem: ${escapeHtml(msg)}` : "";
+        
+        return `<div class="challenge">
+          <div>${line1}</div>
+          <div class="small">${line2}</div>
+          <div class="status">${line3}</div>
+          ${line4 ? `<div class="small">${line4}</div>` : ``}
+        </div>`;
+      }).join("");
+    }
+
+    async function sendChallenge(){
+      hideToast();
+
+      const desafiante = elDesafiante.value;
+      const desafiado  = elDesafiado.value;
+      const data_jogo  = elData.value;
+      const hora_jogo  = elHora.value;
+      const mensagem   = elMsg.value.trim();
+
+      if(!desafiante || !desafiado || !data_jogo || !hora_jogo){
+        showToast("Preencha: desafiante, desafiado, data e hora.", "err");
+        return;
+      }
+      if(desafiante === desafiado){
+        showToast("Desafiante e desafiado não podem ser o mesmo time.", "err");
+        return;
+      }
+
+      btnEnviar.disabled = true;
+      btnEnviar.textContent = "ENVIANDO...";
+
+      try{
+        // ✅ ignore_disp=1 => libera mesmo fora da disponibilidade
+        const r = await apiPost("desafios_create", {
+          desafiante, desafiado, data_jogo, hora_jogo, mensagem,
+          ignore_disp: "1"
+        });
+
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = "ENVIAR";
+
+        if(!r.ok){
+          showToast(r.error || "Erro ao criar desafio.", "err");
+          return;
+        }
+
+        elMsg.value = "";
+        showToast("Desafio enviado ✅", "ok");
+        await loadChallenges();
+      }catch(_){
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = "ENVIAR";
+        showToast("API OFF (falha ao carregar).", "err");
+      }
+    }
+
+    async function boot(){
+      try{
+        await loadTeams();
+        setApi(true);
+
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth()+1).padStart(2,"0");
+        const dd = String(now.getDate()).padStart(2,"0");
+        elData.min = `${yyyy}-${mm}-${dd}`;
+
+        availArea.innerHTML = `<div class="small">Selecione o time desafiado.</div>`;
+
+        elDesafiado.addEventListener("change", loadAvailability);
+        btnEnviar.addEventListener("click", sendChallenge);
+
+        await loadChallenges();
+      }catch(err){
+        setApi(false);
+        showToast("API OFF. Confira implantação do Apps Script.", "err");
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

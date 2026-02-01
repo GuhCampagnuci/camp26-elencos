@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CAMP 2026 — Disponibilidade</title>
+
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --card:#121a2a;
+      --text:#e7eefc;
+      --muted:#9bb0d1;
+      --line:#22314f;
+      --accent:#7c5cff;
+      --danger:#ff5c7a;
+      --ok:#4ade80;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(124,92,255,.25), transparent 60%),
+                  radial-gradient(900px 500px at 90% 0%, rgba(124,92,255,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding-bottom: 84px;
+    }
+    a{ color: inherit; text-decoration:none; }
+
+    header{
+      position: sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,23,.65);
+      border-bottom:1px solid rgba(34,49,79,.65);
+    }
+    .wrap{ max-width: 1100px; margin: 0 auto; padding: 14px; }
+
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .title{
+      font-weight: 900; letter-spacing:.4px;
+      font-size: 16px;
+    }
+    .api{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px; border-radius: 999px;
+      border:1px solid rgba(34,49,79,.85);
+      background: rgba(9,12,18,.55);
+      font-size: 12px; font-weight: 800; color: var(--muted);
+      white-space: nowrap;
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background: var(--muted); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+      margin-top: 12px;
+    }
+    @media (min-width: 980px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,42,.92), rgba(15,22,38,.92));
+      border:1px solid rgba(34,49,79,.75);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .bd{ padding: 14px; }
+
+    .small{ font-size: 12px; color: var(--muted); }
+    .sep{ height:1px; background: rgba(34,49,79,.6); margin: 12px 0; }
+
+    select, input, button{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(34,49,79,.85);
+      background: rgba(9,12,18,.65);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    button{
+      cursor:pointer;
+      border: 0;
+      background: var(--accent);
+      font-weight: 900;
+      color: #0b0f17;
+    }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    @media (min-width: 720px){
+      .row2{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .toast{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(34,49,79,.8);
+      background: rgba(9,12,18,.55);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: pre-wrap;
+      display:none;
+    }
+    .toast.ok{ border-color: rgba(74,222,128,.35); color: #bff4d0; }
+    .toast.err{ border-color: rgba(255,92,122,.35); color: #ffd0d9; }
+
+    /* blocos adicionáveis */
+    .slot{
+      border:1px solid rgba(34,49,79,.7);
+      background: rgba(9,12,18,.35);
+      border-radius: 14px;
+      padding: 12px;
+      display:grid;
+      gap:10px;
+    }
+    .slotTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .slotTitle{
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+    .btnGhost{
+      background: transparent;
+      border:1px solid rgba(34,49,79,.85);
+      color: var(--text);
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-weight: 900;
+    }
+
+    /* painel público */
+    .teamGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    @media (min-width: 720px){
+      .teamGrid{ grid-template-columns: 1fr 1fr; }
+    }
+    .teamBox{
+      border:1px solid rgba(34,49,79,.75);
+      background: rgba(9,12,18,.35);
+      border-radius: 14px;
+      padding: 12px;
+      display:grid;
+      gap:10px;
+    }
+    .teamHead{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .teamName{
+      font-weight: 1000;
+      letter-spacing:.4px;
+      font-size: 13px;
+    }
+    .teamBtn{
+      width:auto;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 1000;
+      background: rgba(124,92,255,.15);
+      border: 1px solid rgba(124,92,255,.35);
+      color: var(--text);
+    }
+    .teamBtn.open{
+      background: rgba(255,255,255,.06);
+      border-color: rgba(34,49,79,.75);
+      color: var(--muted);
+    }
+    .availList{
+      margin:0;
+      padding-left: 16px;
+      color: var(--text);
+    }
+    .availList li{
+      margin: 6px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .empty{
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* MENU FIXO */
+    nav.mobileNav{
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 74px;
+      background: rgba(11,15,23,.85);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(34,49,79,.6);
+      z-index: 50;
+    }
+    .navWrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      padding: 8px 8px;
+    }
+    .navItem{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      padding: 6px 6px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-size: 10px;
+      user-select:none;
+    }
+    .navItem .ico{ font-size: 16px; }
+    .navItem.active{
+      color: var(--text);
+      border-color: rgba(124,92,255,.35);
+      background: rgba(124,92,255,.10);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <div class="title">DISPONIBILIDADE</div>
+        <div class="api"><span class="dot" id="apiDot"></span><span id="apiTxt">API</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+
+      <!-- ESQUERDA: MINHA DISPONIBILIDADE -->
+      <section class="card">
+        <div class="bd">
+          <div class="small">SEU TIME</div>
+          <select id="meuTime"></select>
+
+          <div class="sep"></div>
+
+          <div class="small">DIAS E HORÁRIOS DISPONÍVEIS</div>
+          <div id="slots" style="display:grid; gap:10px; margin-top:10px;"></div>
+
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button id="btnAdd" class="btnGhost" type="button" style="flex:1;">+ ADICIONAR DIA</button>
+            <button id="btnSalvar" type="button" style="flex:1;">SALVAR</button>
+          </div>
+
+          <div id="toast" class="toast"></div>
+          <div class="small" style="margin-top:10px;">
+            * Você pode salvar mesmo com horários diferentes por dia.
+          </div>
+        </div>
+      </section>
+
+      <!-- DIREITA: DISPONIBILIDADE PÚBLICA -->
+      <section class="card">
+        <div class="bd">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="font-size:18px;">📌</div>
+            <div style="font-weight:1000; letter-spacing:.3px;">Disponibilidade pública dos times</div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div id="teamGrid" class="teamGrid"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="mobileNav" aria-label="Menu">
+    <div class="navWrap">
+      <a class="navItem" href="index.html" title="Início"><div class="ico">🏠</div><div>Início</div></a>
+      <a class="navItem" href="elencos.html" title="Elencos"><div class="ico">🧑‍🤝‍🧑</div><div>Elencos</div></a>
+      <a class="navItem active" href="disponibilidade.html" title="Disponibilidade"><div class="ico">📅</div><div>Disp.</div></a>
+      <a class="navItem" href="desafios.html" title="Desafios"><div class="ico">⚔️</div><div>Desafios</div></a>
+      <a class="navItem" href="reportar_partida.html" title="Reportar partida"><div class="ico">📝</div><div>Reportar</div></a>
+      <a class="navItem" href="estatisticas.html" title="Estatísticas"><div class="ico">📊</div><div>Stats</div></a>
+      <a class="navItem" href="regras.html" title="Regras"><div class="ico">📜</div><div>Regras</div></a>
+    </div>
+  </nav>
+
+  <script>
+    const API_BASE = "https://script.google.com/macros/s/AKfycbyi1AWCya8OjxVMVWt7JT3CqivvwgKzzRZeH3UQgzQ0Iik3-zTqvgChddwmuKm0E0JLLA/exec";
+
+    const apiDot = document.getElementById("apiDot");
+    const apiTxt = document.getElementById("apiTxt");
+
+    const meuTime = document.getElementById("meuTime");
+    const slotsEl = document.getElementById("slots");
+    const btnAdd = document.getElementById("btnAdd");
+    const btnSalvar = document.getElementById("btnSalvar");
+    const toast = document.getElementById("toast");
+
+    const teamGrid = document.getElementById("teamGrid");
+
+    function setApi(ok){
+      apiDot.style.background = ok ? "var(--ok)" : "var(--danger)";
+      apiTxt.textContent = ok ? "API OK" : "API OFF";
+      apiTxt.style.color = ok ? "var(--ok)" : "var(--danger)";
+    }
+
+    function showToast(msg, type){
+      toast.style.display = "block";
+      toast.textContent = msg;
+      toast.classList.remove("ok","err");
+      toast.classList.add(type === "ok" ? "ok" : "err");
+    }
+
+    function hideToast(){
+      toast.style.display = "none";
+      toast.textContent = "";
+      toast.classList.remove("ok","err");
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    // JSONP
+    function jsonp(route, params = {}) {
+      return new Promise((resolve, reject) => {
+        const cb = "cb_" + Math.random().toString(36).slice(2);
+        const url = new URL(API_BASE);
+        url.searchParams.set("route", route);
+        url.searchParams.set("callback", cb);
+        url.searchParams.set("_ts", Date.now());
+        Object.entries(params).forEach(([k,v]) => {
+          if (v !== undefined && v !== null && String(v).trim() !== "") url.searchParams.set(k, v);
+        });
+
+        const s = document.createElement("script");
+        s.src = url.toString();
+        s.async = true;
+
+        const t = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 12000);
+
+        function cleanup(){
+          clearTimeout(t);
+          if(s.parentNode) s.parentNode.removeChild(s);
+          try{ delete window[cb]; }catch(_){ window[cb] = undefined; }
+        }
+
+        window[cb] = (data) => { cleanup(); resolve(data); };
+        s.onerror = () => { cleanup(); reject(new Error("load_failed")); };
+
+        document.head.appendChild(s);
+      });
+    }
+
+    async function apiGet(route, params){ return jsonp(route, params || {}); }
+
+    // ✅ Formata qualquer hora do Sheets para HH:MM
+    function fmtTime(val){
+      if(val === null || val === undefined) return "";
+      const s = String(val).trim();
+      const m1 = s.match(/\b(\d{2}):(\d{2})\b/);
+      if (m1) return `${m1[1]}:${m1[2]}`;
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        const hh = String(d.getHours()).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        return `${hh}:${mm}`;
+      }
+      return s;
+    }
+
+    // Dias (mostra curto, envia completo)
+    const DIAS = [
+      { label: "Seg", value: "Segunda" },
+      { label: "Ter", value: "Terça" },
+      { label: "Qua", value: "Quarta" },
+      { label: "Qui", value: "Quinta" },
+      { label: "Sex", value: "Sexta" },
+      { label: "Sáb", value: "Sábado" },
+      { label: "Dom", value: "Domingo" },
+    ];
+
+    function slotTemplate(idx){
+      const diasOptions = DIAS.map(d => `<option value="${escapeHtml(d.value)}">${escapeHtml(d.label)}</option>`).join("");
+      return `
+        <div class="slot" data-slot="${idx}">
+          <div class="slotTop">
+            <div class="slotTitle">DIA + HORÁRIO</div>
+            <button class="btnGhost btnRemove" type="button">REMOVER</button>
+          </div>
+
+          <div class="row2">
+            <div>
+              <div class="small">DIA DA SEMANA</div>
+              <select class="dia">${diasOptions}</select>
+            </div>
+            <div>
+              <div class="small">HORÁRIO</div>
+              <div class="row2" style="grid-template-columns: 1fr 1fr;">
+                <div>
+                  <input class="inicio" type="time" value="19:00"/>
+                  <div class="small" style="margin-top:6px;">de</div>
+                </div>
+                <div>
+                  <input class="fim" type="time" value="22:00"/>
+                  <div class="small" style="margin-top:6px;">às</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function addSlot(){
+      const idx = Date.now();
+      slotsEl.insertAdjacentHTML("beforeend", slotTemplate(idx));
+      const last = slotsEl.querySelector(`.slot[data-slot="${idx}"]`);
+      last.querySelector(".btnRemove").addEventListener("click", () => {
+        last.remove();
+      });
+    }
+
+    function getSlotsData(){
+      const blocks = Array.from(slotsEl.querySelectorAll(".slot"));
+      return blocks.map(b => ({
+        dias: b.querySelector(".dia").value,
+        inicio: b.querySelector(".inicio").value,
+        fim: b.querySelector(".fim").value
+      }));
+    }
+
+    // Public panel: toggle
+    const openTeams = new Set();
+
+    async function renderTeamsGrid(teams){
+      teamGrid.innerHTML = teams.map(t => {
+        const isOpen = openTeams.has(t);
+        return `
+          <div class="teamBox" data-team="${escapeHtml(t)}">
+            <div class="teamHead">
+              <div class="teamName">${escapeHtml(t)}</div>
+              <button class="teamBtn ${isOpen ? "open" : ""}" type="button">
+                ${isOpen ? "Fechar" : "Ver Datas"}
+              </button>
+            </div>
+            <div class="teamBody" style="display:${isOpen ? "block" : "none"};">
+              <div class="empty">Carregando...</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // bind click
+      Array.from(teamGrid.querySelectorAll(".teamBox")).forEach(box => {
+        const team = box.getAttribute("data-team");
+        const btn = box.querySelector(".teamBtn");
+        const body = box.querySelector(".teamBody");
+
+        btn.addEventListener("click", async () => {
+          if (openTeams.has(team)) {
+            // fechar
+            openTeams.delete(team);
+            body.style.display = "none";
+            btn.classList.remove("open");
+            btn.textContent = "Ver Datas";
+            return;
+          }
+
+          // abrir
+          openTeams.add(team);
+          body.style.display = "block";
+          btn.classList.add("open");
+          btn.textContent = "Fechar";
+          body.innerHTML = `<div class="empty">Carregando...</div>`;
+
+          try{
+            const r = await apiGet("disponibilidade", { time: team });
+            if (!r.ok) {
+              body.innerHTML = `<div class="empty">Erro ao carregar.</div>`;
+              return;
+            }
+            const rows = r.disponibilidade || [];
+            if (!rows.length) {
+              body.innerHTML = `<div class="empty">Sem disponibilidade cadastrada.</div>`;
+              return;
+            }
+
+            // ordena por dia (bem simples)
+            const norm = (x) => String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const idx = (dia) => {
+              const d = norm(dia);
+              if(d.startsWith("seg")) return 0;
+              if(d.startsWith("ter")) return 1;
+              if(d.startsWith("qua")) return 2;
+              if(d.startsWith("qui")) return 3;
+              if(d.startsWith("sex")) return 4;
+              if(d.startsWith("sab")) return 5;
+              if(d.startsWith("dom")) return 6;
+              return 99;
+            };
+            rows.sort((a,b) => idx(a.dias) - idx(b.dias));
+
+            const lines = rows.map(rw => {
+              // dia abreviado para ficar “Seg 19:00 às 22:00”
+              const diaFull = String(rw.dias || "");
+              const diaObj = DIAS.find(d => d.value === diaFull);
+              const diaShort = diaObj ? diaObj.label : diaFull;
+
+              const ini = fmtTime(rw.inicio);
+              const fim = fmtTime(rw.fim);
+              return `<li>${escapeHtml(diaShort)} ${escapeHtml(ini)} às ${escapeHtml(fim)}</li>`;
+            }).join("");
+
+            body.innerHTML = `<ul class="availList">${lines}</ul>`;
+          }catch(_){
+            body.innerHTML = `<div class="empty">API OFF.</div>`;
+          }
+        });
+      });
+    }
+
+    async function salvar(){
+      hideToast();
+
+      const time = meuTime.value;
+      if (!time) {
+        showToast("Selecione seu time.", "err");
+        return;
+      }
+
+      const slots = getSlotsData();
+      if (!slots.length) {
+        showToast("Adicione pelo menos 1 dia/horário.", "err");
+        return;
+      }
+
+      // validações básicas
+      for (const s of slots) {
+        if (!s.dias || !s.inicio || !s.fim) {
+          showToast("Preencha dia, início e fim em todos os blocos.", "err");
+          return;
+        }
+        if (s.inicio >= s.fim) {
+          showToast("Em um dos blocos, o horário inicial está maior/igual ao final.", "err");
+          return;
+        }
+      }
+
+      btnSalvar.disabled = true;
+      btnSalvar.textContent = "SALVANDO...";
+
+      try{
+        // salva cada faixa como uma linha no Sheets (DISPONIBILIDADE)
+        for (const s of slots) {
+          const r = await apiGet("disponibilidade_add", {
+            time,
+            dias: s.dias,
+            inicio: s.inicio,
+            fim: s.fim
+          });
+          if (!r.ok) {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "SALVAR";
+            showToast(r.error || "Erro ao salvar uma faixa.", "err");
+            return;
+          }
+        }
+
+        btnSalvar.disabled = false;
+        btnSalvar.textContent = "SALVAR";
+        showToast("Disponibilidade salva ✅", "ok");
+
+        // atualiza o painel público sem fechar os abertos
+        const teamsResp = await apiGet("teams");
+        if (teamsResp && teamsResp.ok) {
+          await renderTeamsGrid(teamsResp.teams || []);
+        }
+
+      }catch(_){
+        btnSalvar.disabled = false;
+        btnSalvar.textContent = "SALVAR";
+        showToast("API OFF (falha ao salvar).", "err");
+      }
+    }
+
+    async function boot(){
+      try{
+        const r = await apiGet("teams");
+        if (!r.ok) throw new Error("teams_error");
+
+        setApi(true);
+
+        const teams = r.teams || [];
+        meuTime.innerHTML = `<option value="">Selecione...</option>` + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+
+        // começa com 1 bloco
+        addSlot();
+
+        btnAdd.addEventListener("click", addSlot);
+        btnSalvar.addEventListener("click", salvar);
+
+        await renderTeamsGrid(teams);
+
+      }catch(_){
+        setApi(false);
+        showToast("API OFF. Confira a implantação do Apps Script.", "err");
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

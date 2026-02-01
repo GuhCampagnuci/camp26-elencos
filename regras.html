@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CAMP 2026 — Regras</title>
+
+<style>
+  :root{
+    --bg:#0b0f17;
+    --card:#121a2a;
+    --text:#e7eefc;
+    --muted:#9bb0d1;
+    --line:#22314f;
+    --accent:#7c5cff;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 16px;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family: system-ui, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 84px; /* espaço do menu */
+    overflow-x:hidden;
+  }
+
+  header{
+    position: sticky;
+    top:0;
+    z-index:10;
+    backdrop-filter: blur(10px);
+    background: rgba(11,15,23,.70);
+    border-bottom: 1px solid rgba(34,49,79,.65);
+  }
+
+  .wrap{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px;
+  }
+
+  .top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .title{
+    font-weight: 1000;
+    font-size: 16px;
+    letter-spacing: .4px;
+  }
+
+  .subtitle{
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .card{
+    background: linear-gradient(180deg, rgba(18,26,42,.92), rgba(15,22,38,.92));
+    border:1px solid rgba(34,49,79,.75);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    margin-top: 12px;
+  }
+
+  .bd{
+    padding: 14px;
+  }
+
+  .section{
+    padding: 14px;
+    border-top: 1px solid rgba(34,49,79,.45);
+  }
+  .section:first-child{ border-top:0; }
+
+  .h2{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight: 1000;
+    font-size: 14px;
+    margin: 0 0 10px 0;
+  }
+
+  .p{
+    margin: 0;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .muted{
+    color: var(--muted);
+  }
+
+  .list{
+    margin: 10px 0 0 0;
+    padding-left: 18px;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .list li{ margin: 6px 0; }
+
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(124,92,255,.35);
+    background: rgba(124,92,255,.12);
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--text);
+  }
+
+  .note{
+    margin-top: 10px;
+    border: 1px solid rgba(34,49,79,.75);
+    border-radius: 14px;
+    background: rgba(9,12,18,.35);
+    padding: 12px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .grid2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  @media(max-width: 720px){
+    .grid2{ grid-template-columns: 1fr; }
+  }
+
+  .miniCard{
+    border: 1px solid rgba(34,49,79,.70);
+    background: rgba(9,12,18,.28);
+    border-radius: 14px;
+    padding: 12px;
+  }
+  .miniTitle{
+    font-weight: 1000;
+    font-size: 13px;
+    margin: 0 0 8px 0;
+  }
+
+  /* Tabela Cronograma */
+  .tableWrap{
+    margin-top: 10px;
+    border: 1px solid rgba(34,49,79,.75);
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(9,12,18,.28);
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+  }
+  table{
+    width:100%;
+    border-collapse: collapse;
+    min-width: 780px; /* arrasta no mobile */
+  }
+  th, td{
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(34,49,79,.55);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  th{
+    color: var(--muted);
+    font-weight: 1000;
+    background: rgba(9,12,18,.35);
+    text-align:left;
+  }
+  tr:last-child td{ border-bottom:0; }
+
+  .hint{
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .hint span{
+    display:inline-flex;
+    padding:4px 10px;
+    border-radius:999px;
+    border:1px solid rgba(34,49,79,.65);
+    background: rgba(9,12,18,.35);
+  }
+
+  /* Menu */
+  nav.mobileNav{
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 74px;
+    background: rgba(11,15,23,.85);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(34,49,79,.6);
+    z-index: 50;
+  }
+  .navWrap{
+    max-width: 1100px;
+    margin: 0 auto;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    padding: 8px 8px;
+  }
+  .navItem{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding: 6px 6px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-size: 10px;
+    user-select:none;
+    text-decoration:none;
+  }
+  .navItem .ico{ font-size: 16px; }
+  .navItem.active{
+    color: var(--text);
+    border-color: rgba(124,92,255,.35);
+    background: rgba(124,92,255,.10);
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="title">🏆 CAMP 2026 — Regulamento Oficial</div>
+        <div class="subtitle">Regras oficiais do campeonato (liga + mata-mata)</div>
+      </div>
+      <div class="pill">📜 Versão 2026</div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="card">
+
+    <div class="section">
+      <h2 class="h2">1. Visão Geral</h2>
+      <p class="p">
+        O <b>CAMP 2026</b> é um campeonato competitivo de FIFA entre clubes controlados por jogadores humanos, com foco em:
+      </p>
+      <ul class="list">
+        <li>organização</li>
+        <li>justiça nos agendamentos</li>
+        <li>transparência nos resultados</li>
+        <li>engajamento contínuo dos participantes</li>
+      </ul>
+      <div class="note">
+        Este regulamento define as regras oficiais da competição, bem como os processos de agendamento,
+        disputas, registro de partidas e punições.
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">2. Estrutura do Campeonato</h2>
+      <p class="p">
+        O campeonato será disputado em formato de <b>liga (pontos corridos)</b>.
+        Todos os times se enfrentam em <b>2 turnos</b>.
+      </p>
+      <p class="p muted" style="margin-top:10px;">
+        Critérios de classificação seguem o padrão do Campeonato Brasileiro.
+      </p>
+
+      <div class="miniCard" style="margin-top:10px;">
+        <div class="miniTitle">2.1 Pontuação</div>
+        <ul class="list" style="margin-top:0;">
+          <li><b>Vitória:</b> 3 pontos</li>
+          <li><b>Empate:</b> 1 ponto</li>
+          <li><b>Derrota:</b> 0 ponto</li>
+          <li><b>W.O.:</b> 3 pontos para o vencedor (placar padrão definido na Seção 6)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">3. Elencos e Jogadores</h2>
+
+      <div class="miniCard">
+        <div class="miniTitle">3.1 Elenco Oficial</div>
+        <p class="p">
+          Cada time possui um elenco oficial registrado no sistema do campeonato.
+          Cada jogador possui: <b>Nome</b>, <b>Overall</b>, <b>Posição principal</b> e <b>Posições secundárias</b> (quando aplicável).
+        </p>
+        <div class="note">
+          👉 A posição principal será sempre a <b>primeira</b> posição informada
+          (ex: <b>PE/PD/MD</b> → posição principal = <b>PE</b>).
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="miniCard">
+          <div class="miniTitle">3.2 Ajustes, Trocas e Correções</div>
+          <p class="p">
+            Nenhum jogador pode ser alterado diretamente no elenco oficial.
+            Qualquer ajuste deve ser feito via <b>Solicitação de Ajuste</b>, contendo:
+          </p>
+          <ul class="list">
+            <li>Jogador</li>
+            <li>Time atual</li>
+            <li>Novo time</li>
+            <li>Novo overall</li>
+            <li>Posições</li>
+            <li>Motivo (troca, correção, contratação, etc.)</li>
+          </ul>
+        </div>
+
+        <div class="miniCard">
+          <div class="miniTitle">3.3 Aprovação</div>
+          <p class="p">
+            Ajustes devem ser aprovados pelo <b>dono do time envolvido</b>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">4. Disponibilidade de Horários</h2>
+
+      <div class="miniCard">
+        <div class="miniTitle">4.1 Cadastro de Disponibilidade</div>
+        <p class="p">
+          Cada time é obrigado a informar sua disponibilidade semanal de jogo, definindo:
+        </p>
+        <ul class="list">
+          <li><b>Mínimo de 4 dias da semana</b></li>
+          <li>Horário inicial</li>
+          <li>Horário final</li>
+        </ul>
+
+        <div class="note">
+          Exemplo:<br/>
+          <b>Segunda a Sexta:</b> 20:00 às 23:00<br/>
+          <b>Sábado e Domingo:</b> 00:00 às 23:59<br/><br/>
+          Essa informação será <b>pública</b> e usada como base oficial para agendamentos.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">5. Desafios e Agendamento de Partidas</h2>
+
+      <div class="grid2">
+        <div class="miniCard">
+          <div class="miniTitle">5.1 Desafiar um Time</div>
+          <p class="p">Qualquer time pode desafiar outro através do sistema, informando:</p>
+          <ul class="list">
+            <li>Time desafiante</li>
+            <li>Time desafiado</li>
+            <li>Data sugerida</li>
+            <li>Horário sugerido</li>
+          </ul>
+        </div>
+
+        <div class="miniCard">
+          <div class="miniTitle">5.2 Desafio Válido</div>
+          <p class="p">Um desafio só é considerado válido se:</p>
+          <ul class="list">
+            <li>Estiver dentro da janela de disponibilidade do time desafiado</li>
+            <li>For feito com mínimo de <b>1 dia de antecedência</b></li>
+            <li>For registrado corretamente no sistema</li>
+          </ul>
+          <div class="note">
+            Desafios fora desses critérios <b>não contam</b> para regras de W.O.
+          </div>
+        </div>
+      </div>
+
+      <div class="miniCard" style="margin-top:10px;">
+        <div class="miniTitle">5.3 Resposta ao Desafio</div>
+        <p class="p">
+          O time desafiado tem até <b>24 horas</b> para: <b>Aceitar</b> ou <b>Recusar</b>.
+        </p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">6. Regra de W.O. (Walkover)</h2>
+
+      <div class="miniCard">
+        <div class="miniTitle">6.1 Configuração do W.O.</div>
+        <p class="p">
+          Se um time acumular <b>3 desafios válidos</b> (do mesmo desafiante) sem aceitar,
+          será considerado derrota por <b>W.O.</b>, resetando a quantidade de recusa após 1 jogo executado.
+        </p>
+      </div>
+
+      <div class="grid2">
+        <div class="miniCard">
+          <div class="miniTitle">6.2 Placar de W.O.</div>
+          <p class="p"><b>3 x 0</b> para o time vencedor.</p>
+        </div>
+        <div class="miniCard">
+          <div class="miniTitle">6.3 Validação</div>
+          <p class="p">O W.O. <b>não é automático</b>: o sistema apenas sinaliza.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">7. Registro de Partidas</h2>
+
+      <div class="grid2">
+        <div class="miniCard">
+          <div class="miniTitle">7.1 Reporte da Partida</div>
+          <p class="p">
+            Após o jogo, um dos times deve reportar a partida informando:
+          </p>
+          <ul class="list">
+            <li>Times envolvidos</li>
+            <li>Data e horário</li>
+            <li>Placar final</li>
+            <li>Estatísticas do jogo</li>
+          </ul>
+        </div>
+
+        <div class="miniCard">
+          <div class="miniTitle">7.2 Estatísticas Registradas</div>
+          <ul class="list" style="margin-top:0;">
+            <li>Gols (jogador)</li>
+            <li>Assistências (jogador)</li>
+            <li>Cartões (amarelo / vermelho)</li>
+            <li>Lesões (leve / média)</li>
+          </ul>
+          <div class="note">
+            7.3 Confirmação: o outro time deve <b>confirmar o resultado</b> ou <b>contestar</b>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">8. Classificação (Tabela)</h2>
+      <p class="p">
+        A tabela será calculada automaticamente considerando: Pontos, Jogos, Vitórias, Empates, Derrotas,
+        Gols pró, Gols contra e Saldo de gols.
+      </p>
+
+      <div class="miniCard" style="margin-top:10px;">
+        <div class="miniTitle">Critérios de desempate (ordem)</div>
+        <ol class="list" style="margin-top:0;">
+          <li>Pontos</li>
+          <li>Vitórias</li>
+          <li>Confronto direto entre os empatantes</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="h2">9. Disposições Finais</h2>
+      <ul class="list" style="margin-top:0;">
+        <li>Qualquer situação não prevista neste regulamento será resolvida pela organização.</li>
+        <li>O regulamento pode ser atualizado durante o campeonato, desde que comunicado a todos os participantes.</li>
+        <li>Ao participar do CAMP 2026, todos os times concordam com estas regras.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <div class="bd">
+      <h2 class="h2">🗓️ Cronograma Oficial</h2>
+
+      <div class="hint"><span>👈 arraste pro lado</span><div>para ver toda a tabela</div></div>
+
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ETAPA</th>
+              <th>INÍCIO</th>
+              <th>FIM</th>
+              <th>OBS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Draft</b></td>
+              <td>-</td>
+              <td>01/01/2026</td>
+              <td>Início do camp</td>
+            </tr>
+            <tr>
+              <td><b>Início do camp</b></td>
+              <td>02/02/2026</td>
+              <td>30/04/2026</td>
+              <td>Formato liga (2 turnos)</td>
+            </tr>
+            <tr>
+              <td><b>2º Janela Transferência</b></td>
+              <td>13/02/2026 | 00:00</td>
+              <td>15/02/2026 | 23:59</td>
+              <td>Mínimo de 5 jogos para participar da janela</td>
+            </tr>
+            <tr>
+              <td><b>3º Janela Transferência</b></td>
+              <td>27/02/2026 | 00:00</td>
+              <td>01/03/2026 | 23:59</td>
+              <td>Mínimo de 12 jogos para participar da janela</td>
+            </tr>
+            <tr>
+              <td><b>Semi Final</b></td>
+              <td>02/03/2026</td>
+              <td>08/03/2026</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td><b>Final</b></td>
+              <td>09/03/2026</td>
+              <td>15/03/2026</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note" style="margin-top:12px;">
+        <b>Fases de Mata-Mata</b><br/><br/>
+        Em caso de empate nos 2 jogos, vai ter o <b>terceiro jogo</b> para desempatar.<br/>
+        Em caso de empate no terceiro jogo, conta como confronto direto durante o camp:
+        quem teve a melhor contra o outro vence.<br/><br/>
+        Se os 2 jogos da fase de pontos tiverem sido empate, o desempate será por:
+        <b>ordem da tabela em pontos</b> → se igual, <b>saldo de gols</b> → se igual, <b>gols feitos</b>.<br/><br/>
+        E se ainda empatar… a vitória vai para os dois 😂 e vencem o campeonato juntos.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<nav class="mobileNav" aria-label="Menu">
+  <div class="navWrap">
+    <a class="navItem" href="index.html"><div class="ico">🏠</div><div>Início</div></a>
+    <a class="navItem" href="elencos.html"><div class="ico">🧑‍🤝‍🧑</div><div>Elencos</div></a>
+    <a class="navItem" href="disponibilidade.html"><div class="ico">📅</div><div>Disp.</div></a>
+    <a class="navItem" href="desafios.html"><div class="ico">⚔️</div><div>Desafios</div></a>
+    <a class="navItem" href="reportar_partida.html"><div class="ico">📝</div><div>Reportar</div></a>
+    <a class="navItem" href="estatisticas.html"><div class="ico">📊</div><div>Stats</div></a>
+    <a class="navItem active" href="regras.html"><div class="ico">📜</div><div>Regras</div></a>
+  </div>
+</nav>
+
+</body>
+</html>
