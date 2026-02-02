@@ -335,6 +335,10 @@
     // ✅ CORRIGIDO: reconhece posições compostas "ATA/PE/MEI"
     // ==========================================================
     function splitPosTokens(posRaw){
+      // posRaw pode vir como string "ATA/PE/MEI" ou como array ["ATA","PE","MEI"]
+      if (Array.isArray(posRaw)) {
+        return posRaw.map(x => String(x || "").toUpperCase().trim()).filter(Boolean);
+      }
       const raw = String(posRaw || "").toUpperCase().trim();
       if (!raw) return [];
       return raw
@@ -369,9 +373,7 @@
     function buildGroupedTeam(team){
       const name = String(team.name || "").toUpperCase().trim();
 
-      const rawItems = (team.groups && team.groups[0] && Array.isArray(team.groups[0].items))
-        ? team.groups[0].items
-        : [];
+      const rawItems = Array.isArray(team.jogadores) ? team.jogadores : [];
 
       const bucketsOrder = ["Goleiros","Defensores","Meios campistas","Atacantes","Outros"];
       const buckets = {};
@@ -407,7 +409,7 @@
           <div class="player">
             <div class="left">
               <span class="name" title="${esc(p.name)}">${esc(p.name)}</span>
-              <span class="pos" title="Posição">${esc(String(p.positions || "-"))}</span>
+              <span class="pos" title="Posição">${esc(Array.isArray(p.positions) ? p.positions.join("/") : String(p.positions || "-"))}</span>
             </div>
             <span class="ovr">${esc(p.overall ?? "—")}</span>
           </div>
@@ -462,12 +464,13 @@
           state.textContent = "⚠️ A API respondeu, mas não trouxe elencos.\n\nDetalhe: " + (r && r.error ? r.error : "Resposta inválida");
           return;
         }
-        if (!Array.isArray(r.teams)) {
+        const teamsArr = Array.isArray(r.teams) ? r.teams : (Array.isArray(r.elencos) ? r.elencos : null);
+        if (!teamsArr) {
           state.textContent = "⚠️ JSON inesperado.\n\nRecebi:\n" + JSON.stringify(r, null, 2);
           return;
         }
 
-        const teams = r.teams.slice().sort((a,b)=> String(a.name||"").localeCompare(String(b.name||""), "pt-BR"));
+        const teams = teamsArr.slice().sort((a,b)=> String(a.name||"").localeCompare(String(b.name||""), "pt-BR"));
         grid.innerHTML = teams.map(teamCard).join("");
         attachToggles();
 
