@@ -123,7 +123,6 @@
     background: rgba(9,12,18,.35);
   }
   th.num, td.num{ text-align:center; }
-  th.num{ width: 54px; }
 
   /* ✅ COLUNAS FIXAS */
   .sticky{
@@ -162,13 +161,13 @@
   @media (max-width: 520px){
     :root{
       --w-pos: 42px;
-      --w-team: 170px;  /* 👈 menor (era 280) */
+      --w-team: 170px;
       --w-p: 56px;
     }
     th, td{ padding: 11px 8px; }
     .col-team{ letter-spacing: .2px; }
     .pill{ min-width: 38px; padding: 3px 8px; }
-    table{ min-width: 720px; } /* ✅ rola menos no celular */
+    table{ min-width: 720px; }
   }
 
   /* MENU MOBILE */
@@ -329,7 +328,24 @@
     });
   }
 
-  async function loadStandings(){
+  function normalizeRow(x){
+    // suporta chaves em maiúsculo/minúsculo
+    const get = (k1, k2) => (x && (x[k1] !== undefined ? x[k1] : x[k2]));
+    const time = get("time","TIME");
+    return {
+      time: String(time || "").toUpperCase(),
+      P: get("P","p") ?? get("pts","PTS") ?? 0,
+      J: get("J","j") ?? 0,
+      V: get("V","v") ?? 0,
+      E: get("E","e") ?? 0,
+      D: get("D","d") ?? 0,
+      GP: get("GP","gp") ?? 0,
+      GC: get("GC","gc") ?? 0,
+      SG: get("SG","sg") ?? ((Number(get("GP","gp")||0) - Number(get("GC","gc")||0)))
+    };
+  }
+
+  async function loadTabela(){
     state.style.display = "";
     state.textContent = "Carregando tabela…";
     tbody.innerHTML = "";
@@ -337,7 +353,8 @@
     hint.style.display = "none";
 
     try{
-      const r = await jsonp("standings");
+      // ✅ rota correta da sua API (tabela)
+      const r = await jsonp("tabela");
       setApi(true);
 
       if (!r || !r.ok){
@@ -345,17 +362,20 @@
         return;
       }
 
-      const list = Array.isArray(r.standings) ? r.standings : [];
+      // ✅ aceita tanto 'tabela' quanto versões antigas 'standings'
+      const list = Array.isArray(r.tabela) ? r.tabela : (Array.isArray(r.standings) ? r.standings : []);
       if (list.length === 0){
         state.textContent = "Sem times (TIMES01 está vazio?).";
         return;
       }
 
+      const normalized = list.map(normalizeRow);
+
       state.style.display = "none";
       tableWrap.style.display = "";
       hint.style.display = "";
 
-      tbody.innerHTML = list.map((x, idx) => `
+      tbody.innerHTML = normalized.map((x, idx) => `
         <tr>
           <td class="col-pos sticky stickyPos">${idx+1}</td>
           <td class="col-team sticky stickyTeam">${esc(x.time)}</td>
@@ -377,7 +397,7 @@
     }
   }
 
-  loadStandings();
+  loadTabela();
 </script>
 
 </body>
